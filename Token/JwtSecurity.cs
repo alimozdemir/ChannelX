@@ -2,6 +2,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System;
+using System.Security.Claims;
+using System.Collections.Generic;
 
 namespace ChannelX.Token
 {
@@ -18,11 +20,18 @@ namespace ChannelX.Token
         }
 
         // This will require a claim about user
-        public static JwtSecurityToken GetToken()
+        public static JwtSecurityToken GetToken(string user)
         {
+            var claims = new[]
+            {
+              new Claim(JwtRegisteredClaimNames.Sub, user),
+              new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            };
+
             return new JwtSecurityToken(issuer:Issuer, 
                                         audience: Audience, 
                                         expires:DateTime.UtcNow.AddDays(ExpiresDays),
+                                        claims: claims,
                                         signingCredentials:new SigningCredentials(key:Key(), algorithm:SecurityAlgorithms.HmacSha256));
 
         }

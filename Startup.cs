@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,6 +10,8 @@ using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace ChannelX
 {
@@ -24,7 +27,21 @@ namespace ChannelX
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+
+            services.AddDbContext<Data.DatabaseContext>(o => {
+                o.UseSqlite("DataSource=app.db");
+            });
+
+            services.AddIdentity<Data.ApplicationUser, Data.ApplicationRole>()
+                    .AddEntityFrameworkStores<Data.DatabaseContext>()
+                    .AddDefaultTokenProviders();
+            
+            services.ConfigureApplicationCookie(i => {
+                i.LoginPath = "/login";
+                 
+            });
+            
+            services.AddAuthentication()
                     .AddJwtBearer(options => {
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
@@ -37,7 +54,8 @@ namespace ChannelX
                             ValidAudience = Token.JwtSecurityHelper.Audience,
                             IssuerSigningKey = Token.JwtSecurityHelper.Key()
                         };
-
+                        
+                        options.SaveToken = true;
                         options.Events = new JwtBearerEvents
                         {
                             OnAuthenticationFailed = context =>
@@ -53,7 +71,8 @@ namespace ChannelX
                         };
                     });
 
-            services.AddAuthorization();
+
+
 
             services.AddMvc();
         }

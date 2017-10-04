@@ -5,7 +5,7 @@ import axios, { AxiosRequestConfig } from 'axios';
 @Component
 export default class CounterComponent extends Vue {
     currentcount: number = 0;
-    
+    msg : string = "";
     incrementCounter() {
         console.log(this);
         this.currentcount++;
@@ -20,7 +20,7 @@ export default class CounterComponent extends Vue {
         
         // Check for basic auth
         var testAuth = await axios.get('/Home/Test', { headers : { 'Authorization' : 'Bearer ' + token.data } });
-
-        console.log(testAuth.data);
+        this.msg = testAuth.data;
+        console.log(testAuth);
     }
 }
