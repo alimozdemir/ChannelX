@@ -4,23 +4,26 @@ using System.IdentityModel.Tokens.Jwt;
 using System;
 using System.Security.Claims;
 using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 
 namespace ChannelX.Token
 {
     public class JwtSecurityHelper
     {
-        public static string Issuer {get; set;} = "ChannelX";
-        public static string Audience {get; set;} = "ChannelX";
-        private static int ExpiresDays { get; }  = 5;
-        private const string Secret = "5fdc4141-0815-4fa9-8c69-f25200e1831a";
+        Models.Configuration.Tokens _token;
+        public JwtSecurityHelper(IOptions<Models.Configuration.Tokens> token)
+        {
+            _token = token.Value;
+        }
 
-        public static SymmetricSecurityKey Key(string secret = Secret)
+
+        public static SymmetricSecurityKey Key(string secret)
         {
             return new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret));
         }
 
         // This will require a claim about user
-        public static JwtSecurityToken GetToken(string user)
+        public JwtSecurityToken GetToken(string user)
         {
             var claims = new[]
             {
@@ -28,16 +31,16 @@ namespace ChannelX.Token
               new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
 
-            return new JwtSecurityToken(issuer:Issuer, 
-                                        audience: Audience, 
-                                        expires:DateTime.UtcNow.AddDays(ExpiresDays),
+            return new JwtSecurityToken(issuer:_token.Issuer, 
+                                        audience: _token.Audience, 
+                                        expires:DateTime.UtcNow.AddDays(_token.Expires),
                                         claims: claims,
-                                        signingCredentials:new SigningCredentials(key:Key(), algorithm:SecurityAlgorithms.HmacSha256));
+                                        signingCredentials:new SigningCredentials(key:Key(_token.Key), algorithm:SecurityAlgorithms.HmacSha256));
 
         }
         
         // Get the value of the token
-        public static string GetTokenValue(JwtSecurityToken token)
+        public string GetTokenValue(JwtSecurityToken token)
         {
             return new JwtSecurityTokenHandler().WriteToken(token);
         }

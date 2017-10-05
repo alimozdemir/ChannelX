@@ -1,6 +1,41 @@
 <template>
     <div id="app-root">
-        <p>Login</p>
-        <router-view></router-view>
+        <div class="container">
+            <div class="center-block">
+                <h2 class="logo">CHANNEL<sup>X</sup></h2>
+                <router-view></router-view>
+            </div>
+        </div>
     </div>
 </template>
+
+<style>
+    @import url('https://fonts.googleapis.com/css?family=Open+Sans:400,700&amp;subset=latin-ext');
+
+    .center-block {
+        width:500px;
+        padding-top:9%;
+        margin:0 auto;
+    }
+    
+    input {
+        border-radius: 0px !important;
+    }
+
+    .form-group{
+        padding: 5px;
+    }
+
+    body {
+        background: #fff;
+        font-family: 'Open Sans', sans-serif;
+    }
+
+    .logo{
+        text-align: center;
+        color:rgb(32, 138, 224);
+        font-weight: bold;
+    }
+    
+
+</style>

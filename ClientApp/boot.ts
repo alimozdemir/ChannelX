@@ -29,6 +29,44 @@ const routes = [
 
 var router = new VueRouter({ mode: 'history', routes: routes });
 
+// add the auth key to every request of axios
+axios.interceptors.request.use(request => {
+    let auth = localStorage.getItem('auth');
+
+    if(auth !== undefined && auth)
+        request.headers.common['Authorization'] = 'Bearer ' + auth;
+
+    return request;
+})
+
+axios.interceptors.response.use(response => {
+    return response;
+}, error => {
+    // if unauthorized request then remove the auth key and route to login page
+    if(error.response.status === 401){
+        localStorage.removeItem('auth');
+        router.push('/login');
+    }
+});
+
+
+router.beforeEach((to, from, next) => {
+    let auth = localStorage.getItem('auth');
+    
+    // if the auth key is exists then go foward
+    // otherwise go login page
+    if(auth !== undefined && auth){
+        next();
+    }
+    else if(to.path === '/login') {
+        next();
+    }
+    else {
+        next('/login');
+    }
+
+});
+
 new Vue({
     el: '#app-root',
     router: router,

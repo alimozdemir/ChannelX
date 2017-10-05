@@ -15,6 +15,7 @@
     "isomorphic-fetch": "^2.2.1",
     "jquery": "^3.1.1",
     "style-loader": "^0.13.1",
+    "sweetalert": "^2.0.5",
     "typescript": "^2.2.1",
     "url-loader": "^0.5.7",
     "vue": "^2.2.2",
@@ -26,5 +27,6 @@
     "vuex-typescript": "^0.1.0",
     "webpack": "^2.2.0",
     "webpack-hot-middleware": "^2.12.2"
-  }
+  },
+  "dependencies": {}
 }

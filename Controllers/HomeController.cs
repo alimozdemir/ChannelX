@@ -13,9 +13,11 @@ namespace ChannelX.Controllers
     public class HomeController : Controller
     {
         readonly UserManager<Data.ApplicationUser> _userManager;
-        public HomeController(UserManager<Data.ApplicationUser> userManager)
+        readonly Token.JwtSecurityHelper _jwtHelper;
+        public HomeController(UserManager<Data.ApplicationUser> userManager, Token.JwtSecurityHelper jwtHelper)
         {
             _userManager = userManager;
+            _jwtHelper = jwtHelper;
         }
         public IActionResult Index()
         {
@@ -31,8 +33,8 @@ namespace ChannelX.Controllers
         // An example token generator
         public IActionResult Login()
         {
-            var token = Token.JwtSecurityHelper.GetToken("deneme");
-            var key = Token.JwtSecurityHelper.GetTokenValue(token);
+            var token = _jwtHelper.GetToken("deneme");
+            var key = _jwtHelper.GetTokenValue(token);
             return Json(key);
         }
 
@@ -40,8 +42,7 @@ namespace ChannelX.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Test()
         {
-
-            return Json(new { User = User });
+            return Json("Auth");
         }
 
         public async Task<IActionResult> Test2()

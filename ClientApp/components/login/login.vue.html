@@ -1,6 +1,30 @@
 <template>
-    <div>
-        <p>Hello from login</p>
+    <div class="login">
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-md-2" for="user">Username</label>
+                <div class="col-md-10">
+                    <input type="text" v-model="userName" class="form-control">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-md-2" for="user">Password</label>
+                <div class="col-md-10">
+                    <input type="password" v-model="password" class="form-control">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-12">
+                    <div class="pull-left">
+                        <input type="checkbox" v-model="rememberMe" />
+                       <label> Remember me</label>
+                    </div>
+                    <a href="javascript:;" @click="login" class=" pull-right btn btn-success">Login</a>
+
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
+<script src="./login.ts"></script>

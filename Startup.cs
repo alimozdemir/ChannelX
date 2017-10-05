@@ -29,10 +29,10 @@ namespace ChannelX
         {
 
             services.AddDbContext<Data.DatabaseContext>(o => {
-                o.UseSqlite("DataSource=app.db");
+                o.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
 
-            services.AddIdentity<Data.ApplicationUser, Data.ApplicationRole>()
+            services.AddIdentity<Data.ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<Data.DatabaseContext>()
                     .AddDefaultTokenProviders();
             
@@ -40,7 +40,9 @@ namespace ChannelX
                 i.LoginPath = "/login";
                  
             });
-            
+
+            var tokenConfiguration = Configuration.GetSection("Tokens");
+
             services.AddAuthentication()
                     .AddJwtBearer(options => {
                         options.TokenValidationParameters = new TokenValidationParameters
@@ -50,31 +52,19 @@ namespace ChannelX
                             ValidateLifetime = true,
                             ValidateIssuerSigningKey = true,
 
-                            ValidIssuer = Token.JwtSecurityHelper.Issuer,
-                            ValidAudience = Token.JwtSecurityHelper.Audience,
-                            IssuerSigningKey = Token.JwtSecurityHelper.Key()
+                            ValidIssuer = tokenConfiguration.GetValue<string>("Issuer"),
+                            ValidAudience = tokenConfiguration.GetValue<string>("Audience"),
+                            IssuerSigningKey = Token.JwtSecurityHelper.Key(tokenConfiguration.GetValue<string>("Key"))
                         };
                         
                         options.SaveToken = true;
-                        options.Events = new JwtBearerEvents
-                        {
-                            OnAuthenticationFailed = context =>
-                            {
-                                Console.WriteLine("OnAuthenticationFailed: " + context.Exception.Message);
-                                return Task.CompletedTask;
-                            },
-                            OnTokenValidated = context =>
-                            {
-                                Console.WriteLine("OnTokenValidated: " + context.SecurityToken);
-                                return Task.CompletedTask;
-                            }
-                        };
                     });
 
-
-
-
             services.AddMvc();
+
+            services.Configure<Models.Configuration.Tokens>(tokenConfiguration);
+
+            services.AddSingleton<Token.JwtSecurityHelper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
