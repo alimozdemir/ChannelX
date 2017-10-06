@@ -20,7 +20,7 @@ export default class LoginComponent extends Vue {
         }
         else
         {
-            swal({ text : result.data.message ,  icon: "success" });
+            swal({ text : result.data.message ,  icon: "error" });
         }
     }
 }

@@ -3,8 +3,10 @@ import 'bootstrap';
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import axios from 'axios';
+import VeeValidate from 'vee-validate';
 
 Vue.use(VueRouter);
+Vue.use(VeeValidate);
 
 const routes = [
     

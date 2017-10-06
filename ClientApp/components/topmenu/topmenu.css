@@ -1,0 +1,14 @@
+
+.navbar-top {
+    border: none;
+    border-radius: 0px;
+    padding-left: -15px;
+    margin-left: -35px;
+    margin-right: -15px;
+    border-bottom: 1px solid gray;
+}
+
+.navbar-top .container {
+    width:inherit;
+    padding-left: 0px;
+}

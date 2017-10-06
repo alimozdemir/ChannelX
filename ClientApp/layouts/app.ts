@@ -4,7 +4,8 @@ import axios from 'axios';
 
 @Component({
     components: {
-        MenuComponent: require('../components/navmenu/navmenu.vue.html')
+        MenuComponent: require('../components/navmenu/navmenu.vue.html'),
+        TopMenu : require('../components/topmenu/topmenu.vue.html')
     }
 })
 export default class AppComponent extends Vue {
