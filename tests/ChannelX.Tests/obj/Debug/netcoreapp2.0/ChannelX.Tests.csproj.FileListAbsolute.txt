@@ -1,0 +1,13 @@
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/bin/Debug/netcoreapp2.0/xunit.runner.visualstudio.dotnetcore.testadapter.dll
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/bin/Debug/netcoreapp2.0/xunit.runner.utility.netstandard15.dll
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/bin/Debug/netcoreapp2.0/xunit.runner.reporters.netstandard15.dll
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/bin/Debug/netcoreapp2.0/ChannelX.Tests.deps.json
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/bin/Debug/netcoreapp2.0/ChannelX.Tests.runtimeconfig.json
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/bin/Debug/netcoreapp2.0/ChannelX.Tests.runtimeconfig.dev.json
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/bin/Debug/netcoreapp2.0/ChannelX.Tests.dll
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/bin/Debug/netcoreapp2.0/ChannelX.Tests.pdb
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/obj/Debug/netcoreapp2.0/ChannelX.Tests.csproj.CoreCompileInputs.cache
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/obj/Debug/netcoreapp2.0/ChannelX.Tests.AssemblyInfoInputs.cache
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/obj/Debug/netcoreapp2.0/ChannelX.Tests.AssemblyInfo.cs
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/obj/Debug/netcoreapp2.0/ChannelX.Tests.dll
+/Users/alimozdemir/Documents/CourseProjects/BLG 411E/Project/tst/ChannelX/tests/ChannelX.Tests/obj/Debug/netcoreapp2.0/ChannelX.Tests.pdb
