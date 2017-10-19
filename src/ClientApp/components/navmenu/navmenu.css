@@ -1,5 +1,9 @@
 .main-nav li .glyphicon {
-    margin-right: 10px;
+    margin-left: 5px;
+}
+
+.main-nav li {
+    color: white;
 }
 
 /* Highlighting rules for nav menu items */

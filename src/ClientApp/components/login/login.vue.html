@@ -5,21 +5,21 @@
                 <div class="form-group">
                     <label class="control-label col-md-2" for="user">Username</label>
                     <div class="col-md-10">
-                        <input v-validate="'required'" type="text" v-model="userName" name="userName" class="form-control">
+                        <input v-validate="'required'" type="text" v-model="model.userName" name="userName" class="form-control">
                         <span v-show="errors.has('userName')">{{ errors.first('userName') }}</span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="control-label col-md-2" for="user">Password</label>
                     <div class="col-md-10">
-                        <input v-validate="'required'" type="password" v-model="password" name="password" class="form-control">
+                        <input v-validate="'required'" type="password" v-model="model.password" name="password" class="form-control">
                         <span v-show="errors.has('password')">{{ errors.first('password') }}</span>
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="col-md-12">
                         <div class="pull-left">
-                            <input type="checkbox" v-model="rememberMe" />
+                            <input type="checkbox" v-model="model.rememberMe" />
                             <label> Remember me</label>
                         </div>
                         <a href="javascript:;" @click="login" class=" pull-right btn btn-success">Login</a>

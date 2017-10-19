@@ -1,19 +1,43 @@
 <template>
-    <nav class="navbar navbar-inverse navbar-top navbar-default">
-        <div class="container">
-            <ul class="nav navbar-nav">
-                <li class="active"><a href="#">Home</a></li>
-                <li><a href="#">Global Channels</a></li>
-                <li><a href="#">Settings</a></li>
-            </ul>
-            <ul class="nav navbar-nav pull-right">
-                <li><a href="">Username</a></li>
-                <li>
-                    <a href="javascript:;" @click="logout">Logout</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+    <div class="top-nav">
+
+        <nav class="navbar navbar-inverse navbar-top navbar-default">
+            <div class="container">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <router-link to="/" :exact="true">
+                            <span class="glyphicon glyphicon-home"></span> Home
+                        </router-link>
+                    </li>
+                    <li>
+                        <router-link to="/counter">
+                            <span class="glyphicon glyphicon-education"></span> Counter
+                        </router-link>
+                    </li>
+                    <li>
+                        <router-link to="/fetchdata">
+                            <span class="glyphicon glyphicon-th-list"></span> Fetch data
+                        </router-link>
+                    </li>
+                    <li>
+                        <router-link to="/channel/create">
+                            <span class="glyphicon glyphicon-plus"></span> New Channel
+                        </router-link>
+                    </li>
+                    <li></li>
+                </ul>
+                <ul class="nav navbar-nav pull-right">
+                    <li>
+                        <a href="">Username</a>
+                    </li>
+                    <li>
+                        <a href="javascript:;" @click="logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+    </div>
 </template>
 
 <script src="./topmenu.ts"></script>

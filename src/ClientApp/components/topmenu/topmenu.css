@@ -12,3 +12,10 @@
     width:inherit;
     padding-left: 0px;
 }
+
+.top-nav li a.router-link-active,
+.top-nav li a.router-link-active:hover,
+.top-nav li a.router-link-active:focus {
+    background-color: #4189C7;
+    color: white;
+}

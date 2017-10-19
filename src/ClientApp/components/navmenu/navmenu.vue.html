@@ -13,22 +13,26 @@
             <div class="clearfix"></div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
-                    <li>
-                        <router-link to="/" :exact="true">
-                            <span class="glyphicon glyphicon-home"></span> Home
-                        </router-link>
+                    <li>Public Channels</li>
+                    <li v-for="item in publicList">
+                        <a href="#">
+                            {{ item.title }}
+                            <span class="glyphicon glyphicon-time"></span> {{ item.endTime | duration }}
+                        </a>
                     </li>
-                    <li>
-                        <router-link to="/counter">
-                            <span class="glyphicon glyphicon-education"></span> Counter
-                        </router-link>
+                    <li v-if="publicList.length == 0">
+                        <a href="javascript:;">None</a>
                     </li>
-                    <li>
-                        <router-link to="/fetchdata">
-                            <span class="glyphicon glyphicon-th-list"></span> Fetch data
-                        </router-link>
+                    <li>Engaged Channels</li>
+                    <li v-for="item in engagedList">
+                        <a href="#">
+                            {{ item.title }}
+                            <span class="glyphicon glyphicon-time"></span> {{ item.endTime | duration }}
+                        </a>
                     </li>
-                    <li></li>
+                    <li v-if="engagedList.length == 0">
+                        <a href="javascript:;">None</a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -36,3 +40,4 @@
 </template>
 
 <style src="./navmenu.css" />
+<script src="./navmenu.ts" />

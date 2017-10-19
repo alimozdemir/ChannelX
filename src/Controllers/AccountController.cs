@@ -13,7 +13,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ChannelX.Controllers
-{
+{    
+    [Route("api/[controller]")]
     public class AccountController : Controller 
     {
         readonly UserManager<ApplicationUser> _userManager;
@@ -25,8 +26,12 @@ namespace ChannelX.Controllers
             _signInManager = signInManager;
             _jwtHelper = jwtHelper;
         }
+        public IActionResult Index()
+        {
+            return Json("test");
+        }
 
-        [HttpPost]
+        [HttpPost("[action]")]
         public async Task<IActionResult> Login([FromBody]AccountViewModel model)
         {
             ResultModel result = new ResultModel();

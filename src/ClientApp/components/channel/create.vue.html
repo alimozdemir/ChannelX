@@ -1,0 +1,44 @@
+<template>
+    <div>
+        <h2>
+            <span class="glyphicon glyphicon-plus"></span> New Channel</h2>
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="email">Title:</label>
+                <div class="col-sm-10">
+                    <input type="text" v-model="model.title" class="form-control" placeholder="Enter title" name="title">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="pwd">Password:</label>
+                <div class="col-sm-10">
+                    <input type="password" class="form-control" v-model="model.password" placeholder="Enter password" name="password">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-sm-2" for="email">How long (h) ? :</label>
+                <div class="col-sm-10">
+                    <input type="number" v-model="model.endAtHours" class="form-control" min="1" placeholder="2" name="endAtHours">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <div class="checkbox">
+                        <label>
+                            <input type="checkbox" v-model="model.isPrivate" name="isPrivate"> Is it private ?</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" @click="submit" class="btn btn-success">Submit</button>
+                    <button type="reset" @click="reset" class="btn btn-default">Clear</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</template>
+
+<script src="./create.ts"></script>
