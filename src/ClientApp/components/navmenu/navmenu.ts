@@ -23,6 +23,13 @@ export default class NavMenuComponent extends Vue {
     engagedList: channelListModel[] = [];
 
     async mounted(){
+
+        await setInterval(async () => { await this.refresh() }, 10000)
+
+    }
+
+    async refresh(){
+        console.log("refresh");
         await this.list_public();
         await this.list_engaged();
     }
