@@ -11,16 +11,19 @@ https://nodejs.org/en/
 
 clone the repo
 
-''' git clone https://github.com/lyzerk/ChannelX.git
-''' cd ChannelX/src
-''' npm install
-''' dotnet build
-''' dotnet run
+``` 
+git clone https://github.com/lyzerk/ChannelX.git
+cd ChannelX/src
+npm install
+dotnet build
+dotnet run 
+```
 
 
 
 Database Migration
-
-''' dotnet ef migrations add name
-''' dotnet ef database update
+```
+dotnet ef migrations add name
+dotnet ef database update
+```
 
