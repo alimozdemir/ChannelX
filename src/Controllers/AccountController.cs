@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ChannelX.Controllers
 {
@@ -36,7 +37,9 @@ namespace ChannelX.Controllers
 
                 if(signResult.Succeeded)
                 {
-                    var token = _jwtHelper.GetToken(model.UserName);
+                    var user = await _userManager.Users.FirstOrDefaultAsync(i => i.UserName == model.UserName);
+
+                    var token = _jwtHelper.GetToken(user.Id);
                     var key = _jwtHelper.GetTokenValue(token);
                     result.Succeeded = true;
                     result.Data = key;

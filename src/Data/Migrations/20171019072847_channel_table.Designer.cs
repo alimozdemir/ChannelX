@@ -11,9 +11,10 @@ using System;
 namespace ChannelX.Data.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20171019072847_channel_table")]
+    partial class channel_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,8 +79,6 @@ namespace ChannelX.Data.Migrations
 
                     b.Property<DateTime>("EndAt");
 
-                    b.Property<string>("Hash");
-
                     b.Property<bool>("IsPrivate");
 
                     b.Property<string>("OwnerId");
@@ -93,19 +92,6 @@ namespace ChannelX.Data.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Channels");
-                });
-
-            modelBuilder.Entity("ChannelX.Data.ChannelUser", b =>
-                {
-                    b.Property<int>("ChannelId");
-
-                    b.Property<string>("UserId");
-
-                    b.HasKey("ChannelId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ChannelUser");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -220,19 +206,6 @@ namespace ChannelX.Data.Migrations
                     b.HasOne("ChannelX.Data.ApplicationUser", "Owner")
                         .WithMany("Channels")
                         .HasForeignKey("OwnerId");
-                });
-
-            modelBuilder.Entity("ChannelX.Data.ChannelUser", b =>
-                {
-                    b.HasOne("ChannelX.Data.Channel", "Channel")
-                        .WithMany("Users")
-                        .HasForeignKey("ChannelId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("ChannelX.Data.ApplicationUser", "User")
-                        .WithMany("EngagedChannels")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
