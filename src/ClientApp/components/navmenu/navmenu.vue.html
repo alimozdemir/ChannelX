@@ -15,10 +15,11 @@
                 <ul class="nav navbar-nav">
                     <li>Public Channels</li>
                     <li v-for="item in publicList">
-                        <a href="#">
+
+                        <router-link :to="{ name: '/channel/open', params : { id : item.id } }">
                             {{ item.title }}
                             <span class="glyphicon glyphicon-time"></span> {{ item.endTime | duration }}
-                        </a>
+                        </router-link>
                     </li>
                     <li v-if="publicList.length == 0">
                         <a href="javascript:;">None</a>

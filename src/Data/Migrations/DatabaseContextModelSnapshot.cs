@@ -105,7 +105,7 @@ namespace ChannelX.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChannelUser");
+                    b.ToTable("ChannelUsers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

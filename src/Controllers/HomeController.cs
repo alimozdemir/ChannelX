@@ -51,8 +51,9 @@ namespace ChannelX.Controllers
         public async Task<IActionResult> Test2()
         {
             var result = await _userManager.CreateAsync(new Data.ApplicationUser() { UserName = "deneme", Email = "deneme" }, "Deneme123!");
+            var result2 = await _userManager.CreateAsync(new Data.ApplicationUser() { UserName = "deneme1", Email = "deneme1" }, "Deneme123!");
 
-            return Json(result);
+            return Json(new { r1 = result.Succeeded , r2 = result2.Succeeded });
         }
     }
 }

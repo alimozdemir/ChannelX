@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
-namespace ChannelX.Data 
+namespace ChannelX.Data
 {
     public class DatabaseContext : IdentityDbContext<ApplicationUser>
     {
@@ -18,7 +18,8 @@ namespace ChannelX.Data
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
 
-            builder.Entity<Channel>(entity => {
+            builder.Entity<Channel>(entity =>
+            {
 
                 entity.HasOne(i => i.Owner)
                     .WithMany(i => i.Channels)
@@ -26,14 +27,15 @@ namespace ChannelX.Data
 
             });
 
-            builder.Entity<ChannelUser>(entity => {
+            builder.Entity<ChannelUser>(entity =>
+            {
 
                 entity.HasKey(i => new { i.ChannelId, i.UserId });
 
                 entity.HasOne(i => i.User)
                     .WithMany(i => i.EngagedChannels)
                     .HasForeignKey(i => i.UserId);
-                
+
                 entity.HasOne(i => i.Channel)
                     .WithMany(i => i.Users)
                     .HasForeignKey(i => i.ChannelId);
@@ -42,6 +44,7 @@ namespace ChannelX.Data
         }
 
         public DbSet<Channel> Channels { get; set; }
+        public DbSet<ChannelUser> ChannelUsers { get; set; }
     }
 
 }

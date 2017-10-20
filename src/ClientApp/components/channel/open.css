@@ -1,0 +1,63 @@
+
+    /*
+    
+var container = this.$el.querySelector("#container");
+container.scrollTop = container.scrollHeight;
+    */
+    .main{
+        width:1000px;
+        height: 500px;
+        margin-top: 10px;
+        position: relative;
+    }
+    .chat{
+        height: 100%;
+        width: 100%;
+        border:1px solid #ddd;
+        border-radius: 5px;
+        position: relative;
+        overflow:scroll;
+    }
+    .chat ul{
+        bottom: 40px;
+        position: absolute;
+        list-style-type: none;
+        padding: 0px;
+        height: 100%;
+    }
+    .chat ul > li {
+        padding: 10px;
+        margin:10px;
+        max-width: 80%;
+    }
+    .chat ul > li::before, .chat ul > li::after {
+        clear:both;
+    }
+    .chat ul > li.receive {
+        float:left;
+        background: #5DAAE9;
+        border-radius: 5px;
+    }
+    .chat ul > li.send {
+        float:right;
+        background: #2DF52D;
+        border-radius: 5px;
+    }
+    .chat ul > li.notify::before {
+        clear:both;
+    }
+    .chat ul > li.notify{
+        display: block;
+        text-align: center;
+        color:gray;
+        float:left;
+        width:100%;
+        max-width:100%;
+    }
+    .chat div.control {
+        padding-top:10px;
+        bottom: 0px;
+        position: absolute;
+        width: 100%;
+        padding: 10px;
+    }

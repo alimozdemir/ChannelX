@@ -11,8 +11,8 @@ using System;
 namespace ChannelX.Data.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20171019082932_channel_users")]
-    partial class channel_users
+    [Migration("20171020153802_channel_user_table")]
+    partial class channel_user_table
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -106,7 +106,7 @@ namespace ChannelX.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("ChannelUser");
+                    b.ToTable("ChannelUsers");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

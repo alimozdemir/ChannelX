@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Primitives;
 
 namespace ChannelX
 {
@@ -58,6 +59,17 @@ namespace ChannelX
                         };
                         
                         options.SaveToken = true;
+                        options.Events = new JwtBearerEvents();
+                        options.Events.OnMessageReceived = context =>
+                        {
+                            StringValues token;
+                            if (context.Request.Path.Value.StartsWith("/api/chat") && context.Request.Query.TryGetValue("token", out token))
+                            {
+                                context.Token = token;
+                            }
+
+                            return Task.CompletedTask;
+                        };
                     });
 
             services.AddMvc();
@@ -65,6 +77,8 @@ namespace ChannelX
             services.Configure<Models.Configuration.Tokens>(tokenConfiguration);
 
             services.AddSingleton<Token.JwtSecurityHelper>();
+            
+            services.AddSignalR();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -86,6 +100,11 @@ namespace ChannelX
             app.UseStaticFiles();
 
             app.UseAuthentication();
+
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<Hubs.Chat>("api/chat");
+            });
 
             app.UseMvc(routes =>
             {
