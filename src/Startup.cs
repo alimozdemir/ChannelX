@@ -77,8 +77,11 @@ namespace ChannelX
             services.Configure<Models.Configuration.Tokens>(tokenConfiguration);
 
             services.AddSingleton<Token.JwtSecurityHelper>();
-            
+
             services.AddSignalR();
+
+            services.AddSingleton<Models.Trackers.UserTracker>();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

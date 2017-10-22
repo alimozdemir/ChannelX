@@ -4,11 +4,27 @@
 var container = this.$el.querySelector("#container");
 container.scrollTop = container.scrollHeight;
     */
+
+    .panel {
+        width: 100%;
+    }
+    .properties {
+        width: 19%;
+        height: 520px;
+        display: inline-block;
+        margin-top: 0px;
+    }
+
+    .properties .prop_main{
+        position: relative;
+    }
+
     .main{
-        width:1000px;
+        width:80%;
         height: 500px;
         margin-top: 10px;
         position: relative;
+        display: inline-block;
     }
     .chat{
         height: 100%;

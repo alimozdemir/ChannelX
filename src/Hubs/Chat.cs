@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 using ChannelX.Data;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using ChannelX.Models.Trackers;
 
 namespace ChannelX.Hubs
 {
@@ -15,20 +17,60 @@ namespace ChannelX.Hubs
     public class Chat : Hub
     {
         readonly DatabaseContext _db;
-
-        public Chat(DatabaseContext db)
+        readonly UserTracker _tracker;
+        public Chat(DatabaseContext db, UserTracker tracker)
         {
             _db = db;
+            _tracker = tracker;
         }
-        public Task Join(JoinModel model)
+        public override Task OnDisconnectedAsync(Exception exception)
         {
-            return Task.FromResult(0);
+            _tracker.Remove(Context.Connection);
+            return base.OnDisconnectedAsync(exception);
         }
-        public async Task Send(string message)
+
+        public override Task OnConnectedAsync()
         {
-            var test = _db.Channels.Select(i => new { i.Title, i.Id }).ToListAsync();
-            var msg = JsonConvert.SerializeObject(test);
-            await Clients.All.InvokeAsync("receive", msg);
+            return base.OnConnectedAsync();
+        }
+
+        public async Task Join(JoinModel model)
+        {
+            var userId = Context.User.GetUserId();
+            var user = await _db.Users.FindAsync(userId);
+            var channel = await _db.Channels.FindAsync(model.ChannelId);
+
+            if(user != null && channel != null)
+            {
+                await Groups.AddAsync(Context.ConnectionId, model.ChannelId.ToString());
+
+                var userDetail = new UserDetail(Context.ConnectionId, user.UserName, model.ChannelId.ToString());
+                var userModel = new UserModel(user.UserName, channel.OwnerId == userId);
+
+                _tracker.Add(Context.Connection, userDetail);
+                
+                var users = await _tracker.All(userDetail.GroupId);
+
+                await Clients.Client(Context.ConnectionId).InvokeAsync("UserList", users);
+
+                await Clients.AllExcept(Context.ConnectionId).InvokeAsync("UserJoined", userModel);
+            }
+
+        }
+        
+        public async Task Leave()
+        {
+            var user = _tracker.Remove(Context.Connection);
+            var userModel = new UserModel(user.Name, false);
+
+            await Clients.AllExcept(Context.ConnectionId).InvokeAsync("UserLeft", userModel);
+        } 
+
+        public async Task Send(TextModel model)
+        {
+            var user = await _tracker.Find(Context.ConnectionId);
+
+            await Clients.AllExcept(Context.ConnectionId).InvokeAsync("Receive", new TextModel { Content = model.Content, User = user.Name, Type = 1 });
         }
     }
 }
