@@ -23,10 +23,13 @@ namespace ChannelX.Hubs
             _db = db;
             _tracker = tracker;
         }
-        public override Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception exception)
         {
-            _tracker.Remove(Context.Connection);
-            return base.OnDisconnectedAsync(exception);
+            var user = _tracker.Remove(Context.Connection);
+            var userModel = new UserModel(user.Name, false);
+            await Clients.AllExcept(Context.ConnectionId).InvokeAsync("UserLeft", userModel);
+            
+            await base.OnDisconnectedAsync(exception);
         }
 
         public override Task OnConnectedAsync()
@@ -61,8 +64,9 @@ namespace ChannelX.Hubs
         public async Task Leave()
         {
             var user = _tracker.Remove(Context.Connection);
-            var userModel = new UserModel(user.Name, false);
+            await Groups.RemoveAsync(Context.ConnectionId, user.GroupId);
 
+            var userModel = new UserModel(user.Name, false);
             await Clients.AllExcept(Context.ConnectionId).InvokeAsync("UserLeft", userModel);
         } 
 

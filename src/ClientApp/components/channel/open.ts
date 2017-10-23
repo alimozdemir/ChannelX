@@ -34,7 +34,8 @@ const chatAPI: string = "api/chat?token=" + localStorage.getItem('auth');
     watch: {
         // if user switch between channels, the vue router does not re-construct the component
         // thus, we have to call fetchData when the $route object changed
-        '$route': 'fetchData'
+        '$route': 'fetchData',
+        'chats' : 'toBottom'
     }
 })
 export default class ChannelOpenComponent extends Vue {
@@ -45,6 +46,13 @@ export default class ChannelOpenComponent extends Vue {
     chats: textModel[] = [];
     connection: HubConnection | null = null;
     users: userModel[] = [];
+
+    toBottom(){
+        
+        let chat = document.getElementsByClassName('chat')[0];
+
+        chat.scrollTop = chat.scrollHeight;
+    }
 
     async fetchData() {
         if (this.connection !== null) {
@@ -77,7 +85,6 @@ export default class ChannelOpenComponent extends Vue {
                     result = getPassword.data as resultModel;
 
                     if (result.succeeded) {
-                        this.text = "Connected";
                         this.model = result.data as getModel;
                         this.getLogs()
 
@@ -88,7 +95,6 @@ export default class ChannelOpenComponent extends Vue {
                 }
             }
             else if (result.succeeded) {
-                this.text = "Connected"
                 this.getLogs()
             }
             else {
@@ -114,7 +120,6 @@ export default class ChannelOpenComponent extends Vue {
         this.connection = new HubConnection(chatAPI, {});
 
         await this.connection.start();
-
         this.connection.on('userList', this.userList);
         this.connection.on('userLeft', this.userLeft);
         this.connection.on('userJoined', this.userJoined)
@@ -130,15 +135,19 @@ export default class ChannelOpenComponent extends Vue {
     userLeft(user: userModel) {
         let index = this.users.findIndex(i => i.Name == user.Name);
         if (index > -1) {
+            var model: textModel = { Content :this.users[index].Name + ' is left the channel.', Type : 3, User : 'Me' };
             this.users.splice(index, 1);
+            this.chats.push(model)
         }
     }
 
     userJoined(user: userModel) {
+        var model: textModel = { Content :user.Name + ` is join the channel.`, Type : 3, User : 'Me' };
+        this.chats.push(model);
         this.users.push(user);
     }
     send() {
-        if (this.connection !== null) {
+        if (this.connection !== null && this.text !== "" && this.text !== undefined) {
             var model: textModel = { Content :this.text, Type : 2, User : 'Me' };
             this.connection.invoke('send', model)
 

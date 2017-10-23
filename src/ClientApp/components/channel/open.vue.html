@@ -6,41 +6,17 @@
 
             <div class="chat">
                 <ul>
-                    <li class="receive">
-                        <strong>Client-side navigation</strong>.</li>
 
-                    <li class="receive">
-                        <strong>Client-side navigation</strong>..</li>
-
-                    <li class="receive">
-                        <strong>Client-side navigation</strong>. For example, click
-                        <em>Counter</em> then
-                        <em>Back</em> to return here.</li>
-
-
-                    <li class="receive">
-                        <strong>Client-side navigation</strong>.</li>
-
-                    <li class="receive">
-                        <strong>Client-side navigation</strong>.</li>
-                    <li class="send">
-                        <strong>Webpack dev middleware</strong>. In development mode, there's no need to run the
-                        <code>webpack</code> build tool. Your client-side resources are dynamically built on demand. Updates are available as
-                        soon as you modify any file.</li>
-                    <li class="notify">X joined to chat.</li>
-                    <li class="receive">
-                        <strong>Hot module replacement</strong>. In development mode, you don't even need to reload the page after
-                        making most changes. Within seconds of saving changes to files, your Vue app will be rebuilt and
-                        a new instance injected is into the page.</li>
-                    <li class="send">
-                        <strong>Efficient production builds</strong>. In ps are disabled, and the
-                        <code>webpack</code> build tool produces minified static CSS and JavaScript files.</li>
+                    <li v-for="item in chats" v-bind:class="{ 'receive' : item.Type == 1, 'send' : item.Type == 2, 'notify' : item.Type == 3 }">
+                        <div class="msg">
+                            {{item.Content}}
+                        </div>
+                    </li>
                 </ul>
-
             </div>
 
             <div class="control">
-                <input type="text" v-model="text" placeholder="Enter text" class="form-control" @keyup.enter="send">
+                <input type="text" v-model="text" placeholder="Enter text" id="text" class="form-control" @keyup.enter="send">
             </div>
 
         </div>
@@ -60,7 +36,84 @@
 
 <!--
 
+                <ul>
                     <li v-for="item in chats" v-bind:class="{ 'receive' : item.Type == 1, 'send' : item.Type == 2 }">
-                        {{item.Content}}
+                        <div class="msg">
+                            {{item.Content}}
+                        </div>
                     </li>
+                    <li class="receive">
+                        <div class="msg">
+                            <strong>Client-side navigation</strong>.
+                        </div>
+                    </li>
+                    <li class="receive">
+                        <div class="msg">
+                            <strong>Client-side navigation</strong>..
+                        </div>
+
+                    </li>
+                    <li class="receive">
+                        <div class="msg">
+                            <strong>Client-side navigation</strong>. For example, click
+                            <em>Counter</em> then
+                            <em>Back</em> to return here.
+                        </div>
+                    </li>
+                    <li class="receive">
+                        <div class="msg">
+                            <strong>Client-side navigation</strong>.
+                        </div>
+
+                    </li>
+                    <li class="receive">
+                        <div class="msg">
+                            In development mode, there's no need to run the build tool. Your client-side resources are dynamically built on demand. Updates
+                            are available as soon as you modify any file.
+                        </div>
+                    </li>
+                    <li class="send">
+                        <div class="msg">
+                            In development mode, there's no need to run the build tool. Your client-side resources are dynamically built on demand. Updates
+                            are available as soon as you modify any file.
+                        </div>
+                    </li>
+                    <li class="notify">
+                        <div class="msg">
+                            X joined to chat.
+                        </div>
+
+                    </li>
+                    <li class="receive">
+                        <div class="msg">
+                            Hot module replacement.
+                        </div>
+                    </li>
+                    <li class="send">
+                        <div class="msg">
+                            Efficient production builds. In ps are disabled, and the build tool produces minified static CSS and JavaScript files.
+                        </div>
+                    </li>
+                    <li class="receive">
+                        <div class="msg">
+                            Hot module replacement.
+                        </div>
+                    </li>
+
+                    <li class="send">
+                        <div class="msg">
+                            Efficient production builds. In ps are disabled, and the build tool produces minified static CSS and JavaScript files.
+                        </div>
+                    </li>
+                    <li class="receive">
+                        <div class="msg">
+                            Hot module replacement.
+                        </div>
+                    </li>
+                    <li class="send">
+                        <div class="msg">
+                            Efficient production builds. In ps are disabled, and the build tool produces minified static CSS and JavaScript files.
+                        </div>
+                    </li>
+                </ul>
 -->

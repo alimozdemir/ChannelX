@@ -35,30 +35,44 @@ container.scrollTop = container.scrollHeight;
         overflow:scroll;
     }
     .chat ul{
-        bottom: 40px;
         position: absolute;
         list-style-type: none;
         padding: 0px;
         height: 100%;
+        width: 100%;
+        max-width: 100%;
+        padding-right: 10px;
     }
     .chat ul > li {
+        width: 100%;
         padding: 10px;
         margin:10px;
-        max-width: 80%;
+        display: flex;
     }
-    .chat ul > li::before, .chat ul > li::after {
-        clear:both;
+    .chat ul > li:after {
+        content: '';
+        display: block;
+        clear: both;
     }
     .chat ul > li.receive {
-        float:left;
+        justify-content: flex-end;
+        align-items: flex-end;
+        text-align: right;
+    }
+
+    .chat ul > li.receive > .msg {
+
         background: #5DAAE9;
         border-radius: 5px;
+        padding: 10px;
     }
-    .chat ul > li.send {
-        float:right;
+
+    .chat ul > li.send > .msg {
         background: #2DF52D;
+        padding: 10px;
         border-radius: 5px;
     }
+
     .chat ul > li.notify::before {
         clear:both;
     }
@@ -76,4 +90,9 @@ container.scrollTop = container.scrollHeight;
         position: absolute;
         width: 100%;
         padding: 10px;
+    }
+
+    #text {
+        margin-top:10px;
+        border-radius: 5px !important; 
     }
