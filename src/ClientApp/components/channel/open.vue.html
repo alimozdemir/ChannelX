@@ -9,7 +9,10 @@
 
                     <li v-for="item in chats" v-bind:class="{ 'receive' : item.Type == 1, 'send' : item.Type == 2, 'notify' : item.Type == 3 }">
                         <div class="msg">
-                            {{item.Content}}
+                                <span v-if="item.Type == 1">{{item.User}} : </span> 
+                              
+                             
+                             {{item.Content}}
                         </div>
                     </li>
                 </ul>

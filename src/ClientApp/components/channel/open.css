@@ -45,8 +45,8 @@ container.scrollTop = container.scrollHeight;
     }
     .chat ul > li {
         width: 100%;
-        padding: 10px;
-        margin:10px;
+        padding: 5px;
+        margin:5px;
         display: flex;
     }
     .chat ul > li:after {
@@ -55,20 +55,23 @@ container.scrollTop = container.scrollHeight;
         clear: both;
     }
     .chat ul > li.receive {
-        justify-content: flex-end;
-        align-items: flex-end;
         text-align: right;
     }
 
+    .chat ul > li.send {
+
+        justify-content: flex-end;
+        align-items: flex-end;
+    }
     .chat ul > li.receive > .msg {
 
-        background: #5DAAE9;
+        background: rgb(125, 189, 241);
         border-radius: 5px;
         padding: 10px;
     }
 
     .chat ul > li.send > .msg {
-        background: #2DF52D;
+        background: rgb(137, 247, 137);
         padding: 10px;
         border-radius: 5px;
     }
