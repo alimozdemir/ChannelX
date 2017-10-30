@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
 import { createDecorator } from 'vue-class-component'
-import signalR, { HubConnection } from '@aspnet/signalR-client';
+import signalR, { HubConnection } from '@aspnet/signalr-client';
 import axios from 'axios';
 import resultModel from '../../models/resultModel';
 import swal from 'sweetalert';
