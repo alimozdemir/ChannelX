@@ -17,14 +17,17 @@ const routes = [
             { path: '/counter', component: require('./components/counter/counter.vue.html') },
             { path: '/fetchdata', component: require('./components/fetchdata/fetchdata.vue.html') },
             { path: '/channel/create', component : require('./components/channel/create.vue.html') },
-            { name: '/channel/open', path: '/channel/open/:id', component: require('./components/channel/open.vue.html'), props: true  }
+            { name: '/channel/open', path: '/channel/open/:id', component: require('./components/channel/open.vue.html'), props: true  },
+            { path: '/historypage', component : require('./components/historypage/historypage.vue.html') }
+            
         ]
     },
     {   
         path : '', 
         component : require('./layouts/login.vue.html'),
         children : [
-            { path : '/login', component : require('./components/login/login.vue.html') }
+            { path : '/login', component : require('./components/login/login.vue.html') },
+            { path: '/register', component: require('./components/register/register.vue.html') },
         ]
     }
 ]
@@ -58,10 +61,11 @@ router.beforeEach((to, from, next) => {
     
     // if the auth key is exists then go foward
     // otherwise go login page
+    
     if(auth !== undefined && auth){
         next();
     }
-    else if(to.path === '/login') {
+    else if(to.path === '/login' || to.path === '/register') {
         next();
     }
     else {

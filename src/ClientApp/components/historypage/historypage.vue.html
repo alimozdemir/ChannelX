@@ -1,0 +1,46 @@
+<template>
+    <form>
+        <div class="hsitorypage">
+            <div class="form-horizontal">
+                <div>
+                    <a href="javascript:;" @click="login" class=" pull-right btn btn-success">Login</a>
+                    <h2>Basic Table</h2>
+                    <p>The .table class adds basic styling (light padding and only horizontal dividers) to a table:</p>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Channel Number</th>
+                                <th>Channel Name</th>
+                                <th>Engaged Users</th>
+                                <th>Duration</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in modelList">
+                                <td>
+                                    {{item.id}}
+                                </td>
+                                <td>
+                                    {{item.title}}
+                                </td>
+                                <td>
+                                    {{item.endAt}}
+                                </td>
+                                <td>
+                                    {{item.title}}
+                                </td>
+                                <td>
+                                    {{item.title}}
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </form>
+</template>
+
+<script src="./historypage.ts"></script>
