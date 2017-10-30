@@ -180,6 +180,24 @@ namespace ChannelX.Controllers
 
             return Json(result);
         }
+        [HttpGet("[action]")]
+        public async Task<IActionResult> HistoryPage()
+        {
+            var userId = User.GetUserId();
+
+            var list = await _db.Channels
+                      
+                        .Select(i => new HistoryModel()
+                        {
+                            Id = i.Id,
+                            Title = i.Title,
+                            EndAt = i.EndAt,
+                            Duration = (int)(i.EndAt-i.CreatedAt).TotalHours
+                        })
+                        .ToListAsync();
+
+            return Json(list);
+        }
 
     }
 }

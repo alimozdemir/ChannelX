@@ -17,7 +17,9 @@ const routes = [
             { path: '/counter', component: require('./components/counter/counter.vue.html') },
             { path: '/fetchdata', component: require('./components/fetchdata/fetchdata.vue.html') },
             { path: '/channel/create', component : require('./components/channel/create.vue.html') },
-            { name: '/channel/open', path: '/channel/open/:id', component: require('./components/channel/open.vue.html'), props: true  }
+            { name: '/channel/open', path: '/channel/open/:id', component: require('./components/channel/open.vue.html'), props: true  },
+            { path: '/historypage', component : require('./components/historypage/historypage.vue.html') }
+            
         ]
     },
     {   
