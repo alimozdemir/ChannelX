@@ -57,5 +57,31 @@ namespace ChannelX.Controllers
 
             return Json(result);
         }
+        
+        [HttpPost("[action]")]
+        public async Task<IActionResult> Register([FromBody]RegisterViewModel model)
+        {
+            ResultModel result = new ResultModel();
+            
+            if (ModelState.IsValid)
+            {
+                var user = new ApplicationUser { UserName = model.UserName,FirstAndLastName=model.FirstAndLastName,Email = model.Email };
+                var Registerresult = await _userManager.CreateAsync(user, model.Password);
+                if (Registerresult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    
+                    result.Succeeded = true;
+                }
+                else{
+                    result.Message = string.Join(',', Registerresult.Errors.Select(i => i.Description));
+                }
+            }
+            else{
+                result.Message="Cannot be empty";
+            }
+            
+            return Json(result);
+        }
     }
 }

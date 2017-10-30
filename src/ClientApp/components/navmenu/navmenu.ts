@@ -24,8 +24,9 @@ export default class NavMenuComponent extends Vue {
 
     async mounted(){
         await this.refresh();
-        await setInterval(async () => { await this.refresh() }, 60000)
 
+        var id = await setInterval(async () => { await this.refresh() }, 60000)
+        localStorage.setItem('interval', id.toString())
     }
 
     async refresh(){

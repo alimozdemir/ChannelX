@@ -32,4 +32,5 @@ export default class LoginComponent extends Vue {
             swal({ text: "something went wrong", icon: "error" });
         }
     }
+    
 }

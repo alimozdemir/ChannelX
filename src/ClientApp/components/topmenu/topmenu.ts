@@ -7,6 +7,17 @@ import './topmenu.css';
 export default class TopMenuComponent extends Vue {
     logout(){
         localStorage.removeItem('auth');
+
+        // to stop infinite interval
+        let id = localStorage.getItem('interval');
+
+        if (id != null)
+        {
+            let interval = parseInt(id);
+            localStorage.removeItem('interval');
+            clearInterval(interval);            
+        }
+
         this.$router.push('/login');
     }
 }

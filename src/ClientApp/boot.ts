@@ -24,7 +24,8 @@ const routes = [
         path : '', 
         component : require('./layouts/login.vue.html'),
         children : [
-            { path : '/login', component : require('./components/login/login.vue.html') }
+            { path : '/login', component : require('./components/login/login.vue.html') },
+            { path: '/register', component: require('./components/register/register.vue.html') },
         ]
     }
 ]
@@ -58,10 +59,11 @@ router.beforeEach((to, from, next) => {
     
     // if the auth key is exists then go foward
     // otherwise go login page
+    
     if(auth !== undefined && auth){
         next();
     }
-    else if(to.path === '/login') {
+    else if(to.path === '/login' || to.path === '/register') {
         next();
     }
     else {

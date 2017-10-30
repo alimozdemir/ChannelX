@@ -8,5 +8,7 @@ namespace ChannelX.Data
     {
         public List<Channel> Channels { get; set; }
         public List<ChannelUser> EngagedChannels { get; set; }
+        
+        public string FirstAndLastName {get;set;}
     }
 }

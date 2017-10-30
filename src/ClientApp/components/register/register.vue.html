@@ -1,0 +1,56 @@
+<template>
+    <form>
+        <div class="register">
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-md-3" for="user">Username</label>
+                    <div class="col-md-9">
+                        <input v-validate="'required'" @keyup.enter="register"  type="text"  data-vv-as="User Name"v-model="model.userName" name="userName" class="form-control">
+                        <span class="error" v-show="errors.has('userName')">{{ errors.first('userName') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3" for="user">First & Last Name</label>
+                    <div class="col-md-9">
+                        <input v-validate="'required'" @keyup.enter="register"type="text" data-vv-as="First and Last Name" v-model="model.firstandlastname" name="firstandlastname" class="form-control">
+                        <span class="error" v-show="errors.has('firstandlastname')">{{ errors.first('firstandlastname') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3" for="user">Email</label>
+                    <div class="col-md-9">
+                        <input v-validate="'required'" @keyup.enter="register" type="text" data-vv-as="Email" v-model="model.Email" name="Email" class="form-control">
+                        <span class="error" v-show="errors.has('Email')">{{ errors.first('Email') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3" for="user">Password</label>
+                    <div class="col-md-9">
+                        <input v-validate="'required|confirmed:confirmPassword'" @keyup.enter="register" type="password" v-model="model.password" name="password" class="form-control">
+                        <span class="error" v-show="errors.has('password')">{{ errors.first('password') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-3" for="user">Confirm Password</label>
+                    <div class="col-md-9">
+                        <input v-validate="'required'" @keyup.enter="register" type="password"  data-vv-as="Confirm password"v-model="model.confirmPassword" name="confirmPassword" class="form-control">
+                        <span class="error"v-show="errors.has('confirmPassword')">{{ errors.first('confirmPassword') }}</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="pull-left">
+                            
+                        </div>
+                        <a href="javascript:;" @click="register" @keyup.enter="register" class=" pull-right btn btn-success">Register</a>
+                        <router-link to="/login" class=" margin-5 pull-right btn btn-info">
+                            <span class="glyphicon glyphicon-hand-left"></span> Back
+                        </router-link>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</template>
+
+<script src="./register.ts"></script>
