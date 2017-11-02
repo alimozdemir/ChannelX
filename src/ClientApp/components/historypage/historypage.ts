@@ -8,7 +8,10 @@ import resultModel from '../../models/resultModel';
 interface historyModel {
     id: number,
     title: string,
-    endAt: Date
+    endAt: Date,
+    duration: number,
+    users: string[],
+    createdAt : Date
 }
 
 @Component

@@ -42,7 +42,7 @@ namespace ChannelX.Controllers
                 entity.IsPrivate = model.IsPrivate;
                 entity.Password = model.Password;
                 entity.OwnerId = userId;
-                
+
                 _db.Channels.Add(entity);
 
                 var affected = await _db.SaveChangesAsync();
@@ -186,13 +186,15 @@ namespace ChannelX.Controllers
             var userId = User.GetUserId();
 
             var list = await _db.Channels
-                      
+
                         .Select(i => new HistoryModel()
                         {
                             Id = i.Id,
                             Title = i.Title,
                             EndAt = i.EndAt,
-                            Duration = (int)(i.EndAt-i.CreatedAt).TotalHours
+                            CreatedAt = i.CreatedAt,
+                            EngagedUsersName = i.Users.Select(j => j.User.FirstAndLastName).ToList(),
+                            Duration = (i.EndAt - i.CreatedAt).Hours
                         })
                         .ToListAsync();
 

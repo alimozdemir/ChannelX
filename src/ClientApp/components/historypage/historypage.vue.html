@@ -1,9 +1,8 @@
 <template>
     <form>
-        <div class="hsitorypage">
+        <div class="historypage">
             <div class="form-horizontal">
                 <div>
-                    <a href="javascript:;" @click="login" class=" pull-right btn btn-success">Login</a>
                     <h2>Basic Table</h2>
                     <p>The .table class adds basic styling (light padding and only horizontal dividers) to a table:</p>
                     <table class="table table-bordered">
@@ -25,13 +24,15 @@
                                     {{item.title}}
                                 </td>
                                 <td>
+                                    <span v-for="user in item.users">
+                                        {{user}}
+                                    </span>
+                                </td>
+                                <td>
+                                    {{item.duration}}
+                                </td>
+                                <td>
                                     {{item.endAt}}
-                                </td>
-                                <td>
-                                    {{item.title}}
-                                </td>
-                                <td>
-                                    {{item.title}}
                                 </td>
 
                             </tr>
