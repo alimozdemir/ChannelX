@@ -186,14 +186,14 @@ namespace ChannelX.Controllers
             var userId = User.GetUserId();
 
             var list = await _db.Channels
-
+                        .Include(i => i.Users)
                         .Select(i => new HistoryModel()
                         {
                             Id = i.Id,
                             Title = i.Title,
                             EndAt = i.EndAt,
                             CreatedAt = i.CreatedAt,
-                            EngagedUsersName = i.Users.Select(j => j.User.FirstAndLastName).ToList(),
+                            EngagedUsersName = i.Users.Select(j => j.User.UserName).ToList(),
                             Duration = (i.EndAt - i.CreatedAt).Hours
                         })
                         .ToListAsync();

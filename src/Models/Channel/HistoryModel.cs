@@ -10,15 +10,8 @@ namespace ChannelX.Models.Channel
         public string Title { get; set; }
         public double Duration { get; set; }
         public DateTime EndAt { get; set; }
-
         public List<String> EngagedUsersName { get; set; }
-
-
         public DateTime CreatedAt { get; set; }
-
-
-        public bool IsPrivate { get; set; }
-        public string OwnerId { get; set; }
 
     }
 }

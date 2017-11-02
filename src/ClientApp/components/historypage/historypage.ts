@@ -4,17 +4,26 @@ import { Component } from 'vue-property-decorator';
 import axios from 'axios';
 import swal from 'sweetalert';
 import resultModel from '../../models/resultModel';
+import moment from 'moment';
+
 
 interface historyModel {
     id: number,
     title: string,
     endAt: Date,
+    createdAt : Date,
     duration: number,
-    users: string[],
-    createdAt : Date
+    engagedUsersName: string[]
+    
 }
 
-@Component
+@Component/*({
+    filters: {
+        duration : function(createdAt:Date, endAt:Date){
+            return moment(value).fromNow();
+        }
+    }
+})*/
 export default class HistoryPageComponent extends Vue {
 
     modelList: historyModel[] = [];
