@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ChannelX.Models.Trackers;
+// using ServiceStack.Redis;
+using Microsoft.Extensions.Caching.Redis;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace ChannelX.Hubs
 {
@@ -18,10 +21,12 @@ namespace ChannelX.Hubs
     {
         readonly DatabaseContext _db;
         readonly UserTracker _tracker;
-        public Chat(DatabaseContext db, UserTracker tracker)
+        readonly IDistributedCache _cache;
+        public Chat(DatabaseContext db, UserTracker tracker, IDistributedCache cache)
         {
             _db = db;
             _tracker = tracker;
+            _cache = cache;
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
@@ -73,8 +78,10 @@ namespace ChannelX.Hubs
         public async Task Send(TextModel model)
         {
             var user = await _tracker.Find(Context.ConnectionId);
-
-            await Clients.AllExcept(Context.ConnectionId).InvokeAsync("Receive", new TextModel { Content = model.Content, User = user.Name, Type = 1 });
+            TextModel message = new TextModel { Content = model.Content, User = user.Name, Type = 1 };
+            _cache.SetString("lastMessage", model.Content);
+            System.Diagnostics.Debug.WriteLine(model.Content);
+            await Clients.AllExcept(Context.ConnectionId).InvokeAsync("Receive", message);
         }
     }
 }

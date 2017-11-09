@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Primitives;
+using Microsoft.Extensions.Caching.Redis;
 
 namespace ChannelX
 {
@@ -81,6 +82,12 @@ namespace ChannelX
             services.AddSignalR();
 
             services.AddSingleton<Models.Trackers.UserTracker>();
+
+            // services.AddSingleton<ServiceStack.Redis.RedisClient>();
+            services.AddDistributedRedisCache(opt => {
+                opt.Configuration = "127.0.0.1";
+                opt.InstanceName = "master";
+            });
             
         }
 
