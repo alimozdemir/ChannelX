@@ -3,37 +3,37 @@
         <div class="register">
             <div class="form-horizontal">
                 <div class="form-group">
-                    <label class="control-label col-md-3" for="user">Username</label>
+                    <label class="control-label col-md-3" for="user"><span class="glyphicon glyphicon-user"></span></label>
                     <div class="col-md-9">
-                        <input v-validate="'required'" @keyup.enter="register"  type="text"  data-vv-as="User Name"v-model="model.userName" name="userName" class="form-control">
+                       <input v-validate="'required'" @keyup.enter="register"  type="text"  data-vv-as="User Name"v-model="model.userName" name="userName" placeholder="Username" class="form-control">
                         <span class="error" v-show="errors.has('userName')">{{ errors.first('userName') }}</span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3" for="user">First & Last Name</label>
+                    <label class="control-label col-md-3" for="user"><span class="glyphicon glyphicon-pencil"></span></label>
                     <div class="col-md-9">
-                        <input v-validate="'required'" @keyup.enter="register"type="text" data-vv-as="First and Last Name" v-model="model.firstandlastname" name="firstandlastname" class="form-control">
+                        <input v-validate="'required'" @keyup.enter="register"type="text" data-vv-as="First and Last Name" v-model="model.firstandlastname" name="firstandlastname" placeholder="First and Lastname" class="form-control">
                         <span class="error" v-show="errors.has('firstandlastname')">{{ errors.first('firstandlastname') }}</span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3" for="user">Email</label>
+                    <label class="control-label col-md-3" for="user"><span class="glyphicon glyphicon-envelope"></span></label>
                     <div class="col-md-9">
-                        <input v-validate="'required'" @keyup.enter="register" type="text" data-vv-as="Email" v-model="model.Email" name="Email" class="form-control">
+                        <input v-validate="'required'" @keyup.enter="register" type="text" data-vv-as="Email" v-model="model.Email" name="Email" placeholder="Email"class="form-control">
                         <span class="error" v-show="errors.has('Email')">{{ errors.first('Email') }}</span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3" for="user">Password</label>
+                    <label class="control-label col-md-3" for="user"><span class="glyphicon glyphicon-lock"></span></label>
                     <div class="col-md-9">
-                        <input v-validate="'required|confirmed:confirmPassword'" @keyup.enter="register" type="password" v-model="model.password" name="password" class="form-control">
+                        <input v-validate="'required|confirmed:confirmPassword'" @keyup.enter="register" type="password" v-model="model.password" name="password" placeholder="Password" class="form-control">
                         <span class="error" v-show="errors.has('password')">{{ errors.first('password') }}</span>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-3" for="user">Confirm Password</label>
+                    <label class="control-label col-md-3" for="user"><span class="glyphicon glyphicon-lock"></span></label>
                     <div class="col-md-9">
-                        <input v-validate="'required'" @keyup.enter="register" type="password"  data-vv-as="Confirm password"v-model="model.confirmPassword" name="confirmPassword" class="form-control">
+                        <input v-validate="'required'" @keyup.enter="register" type="password"  data-vv-as="Confirm password"v-model="model.confirmPassword" name="confirmPassword" placeholder="Confirm Password" class="form-control">
                         <span class="error"v-show="errors.has('confirmPassword')">{{ errors.first('confirmPassword') }}</span>
                     </div>
                 </div>
