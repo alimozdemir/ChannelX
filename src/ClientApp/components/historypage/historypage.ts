@@ -12,18 +12,23 @@ interface historyModel {
     title: string,
     endAt: Date,
     createdAt : Date,
-    duration: number,
     engagedUsersName: string[]
     
 }
 
-@Component/*({
+@Component({
     filters: {
-        duration : function(createdAt:Date, endAt:Date){
-            return moment(value).fromNow();
+        duration : function(model:historyModel){
+            let end =  moment(model.endAt);
+            let diff = end.diff(model.createdAt);
+            return moment.duration(diff).asHours();
+        },
+        endTime : function(value:Date){
+                let end =  moment(value).format('MMMM Do YYYY, h:mm:ss a');
+                return end;
         }
     }
-})*/
+})
 export default class HistoryPageComponent extends Vue {
 
     modelList: historyModel[] = [];

@@ -3,16 +3,16 @@
         <div class="historypage">
             <div class="form-horizontal">
                 <div>
-                    <h2>Basic Table</h2>
-                    <p>The .table class adds basic styling (light padding and only horizontal dividers) to a table:</p>
+                    <h1>Channel History Page</h1>
+                    <p>Information about pages</p>
                     <table class="table table-bordered">
                         <thead>
                             <tr>
                                 <th>Channel Number</th>
                                 <th>Channel Name</th>
                                 <th>Engaged Users</th>
-                                <th>Duration</th>
-                                <th>Time</th>
+                                <th>Duration (hour)</th>
+                                <th>Time (Last Accesible)</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -29,10 +29,10 @@
                                     </span>
                                 </td>
                                 <td>
-                                    {{item.duration}}
+                                    {{item | duration}}
                                 </td>
                                 <td>
-                                    {{item.endAt}}
+                                    {{item.endAt | endTime}}
                                 </td>
 
                             </tr>

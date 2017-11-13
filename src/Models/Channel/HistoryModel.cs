@@ -8,7 +8,6 @@ namespace ChannelX.Models.Channel
     {
         public int Id { get; set; }
         public string Title { get; set; }
-        public double Duration { get; set; }
         public DateTime EndAt { get; set; }
         public List<String> EngagedUsersName { get; set; }
         public DateTime CreatedAt { get; set; }
