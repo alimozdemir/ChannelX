@@ -10,9 +10,10 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ChannelX.Models.Trackers;
-// using ServiceStack.Redis;
-using Microsoft.Extensions.Caching.Redis;
-using Microsoft.Extensions.Caching.Distributed;
+// using StackExchange.Redis;
+// using Microsoft.Extensions.Caching.Redis;
+// using Microsoft.Extensions.Caching.Distributed;
+using ChannelX.Redis;
 
 namespace ChannelX.Hubs
 {
@@ -21,12 +22,15 @@ namespace ChannelX.Hubs
     {
         readonly DatabaseContext _db;
         readonly UserTracker _tracker;
-        readonly IDistributedCache _cache;
-        public Chat(DatabaseContext db, UserTracker tracker, IDistributedCache cache)
+        // readonly IDistributedCache _cache;
+        readonly StackExchange.Redis.IDatabase _redis_db;
+        // public Chat(DatabaseContext db, UserTracker tracker, IDistributedCache cache)
+        public Chat(DatabaseContext db, UserTracker tracker, IRedisConnectionFactory fact)
         {
             _db = db;
             _tracker = tracker;
-            _cache = cache;
+            // _cache = cache;
+            _redis_db = fact.Connection().GetDatabase();
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
@@ -79,7 +83,8 @@ namespace ChannelX.Hubs
         {
             var user = await _tracker.Find(Context.ConnectionId);
             TextModel message = new TextModel { Content = model.Content, User = user.Name, Type = 1 };
-            _cache.SetString("LastMessage", Convert.ToString(message.Content) );
+            // _cache.SetString("LastMessage", Convert.ToString(message.Content) );
+            _redis_db.StringSet("LastMessage", message.Content);
             System.Diagnostics.Debug.WriteLine(model.Content);
             await Clients.AllExcept(Context.ConnectionId).InvokeAsync("Receive", message);
         }
