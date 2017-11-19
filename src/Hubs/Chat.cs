@@ -79,7 +79,7 @@ namespace ChannelX.Hubs
         {
             var user = await _tracker.Find(Context.ConnectionId);
             TextModel message = new TextModel { Content = model.Content, User = user.Name, Type = 1 };
-            _cache.SetString("lastMessage", model.Content);
+            _cache.SetString("LastMessage", Convert.ToString(message.Content) );
             System.Diagnostics.Debug.WriteLine(model.Content);
             await Clients.AllExcept(Context.ConnectionId).InvokeAsync("Receive", message);
         }
