@@ -24,13 +24,24 @@ namespace ChannelX.Hubs
         readonly UserTracker _tracker;
         // readonly IDistributedCache _cache;
         readonly StackExchange.Redis.IDatabase _redis_db;
+        Boolean connected;
         // public Chat(DatabaseContext db, UserTracker tracker, IDistributedCache cache)
         public Chat(DatabaseContext db, UserTracker tracker, IRedisConnectionFactory fact)
         {
             _db = db;
             _tracker = tracker;
             // _cache = cache;
-            _redis_db = fact.Connection().GetDatabase();
+            var conn = fact.Connection();
+            connected = true;
+            if(conn == null)
+            {
+                connected = false;
+            }
+            if(connected)
+            {
+                _redis_db = fact.Connection().GetDatabase();
+            }
+            
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
@@ -84,7 +95,11 @@ namespace ChannelX.Hubs
             var user = await _tracker.Find(Context.ConnectionId);
             TextModel message = new TextModel { Content = model.Content, User = user.Name, Type = 1 };
             // _cache.SetString("LastMessage", Convert.ToString(message.Content) );
-            _redis_db.StringSet("LastMessage", message.Content);
+            if(connected)
+            {
+                _redis_db.StringSet("LastMessage", message.Content);
+                _redis_db.ListRightPush(Context.ConnectionId.ToString(),message.Content);
+            }
             System.Diagnostics.Debug.WriteLine(model.Content);
             await Clients.AllExcept(Context.ConnectionId).InvokeAsync("Receive", message);
         }

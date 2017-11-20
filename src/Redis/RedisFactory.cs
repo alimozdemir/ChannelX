@@ -17,17 +17,23 @@ namespace ChannelX.Redis
         /// <summary>
         ///     The _connection.
         /// </summary>
-        private readonly Lazy<ConnectionMultiplexer> _connection;
+        private readonly ConnectionMultiplexer _connection;
         
 
         public RedisConnectionFactory()
         {
-            this._connection = new Lazy<ConnectionMultiplexer>(() => ConnectionMultiplexer.Connect("localhost:6379")); // change connection String
+            try{
+                this._connection = ConnectionMultiplexer.Connect("localhost:6379"); // change connection String   
+            }
+            catch{
+                // will handle in the future
+            }
+            
         }
 
         public ConnectionMultiplexer Connection()
         {
-            return this._connection.Value;
+            return this._connection;
         }
     }
 
