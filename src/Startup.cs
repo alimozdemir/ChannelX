@@ -13,7 +13,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Primitives;
-using Microsoft.Extensions.Caching.Redis;
+// using Microsoft.Extensions.Caching.Redis;
+using ChannelX.Redis;
 
 namespace ChannelX
 {
@@ -33,7 +34,8 @@ namespace ChannelX
             services.AddDbContext<Data.DatabaseContext>(o => {
                 o.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
-
+             	
+            services.AddSingleton<IRedisConnectionFactory, RedisConnectionFactory>();
             services.AddIdentity<Data.ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<Data.DatabaseContext>()
                     .AddDefaultTokenProviders();
@@ -83,11 +85,10 @@ namespace ChannelX
 
             services.AddSingleton<Models.Trackers.UserTracker>();
 
-            // services.AddSingleton<ServiceStack.Redis.RedisClient>();
-            services.AddDistributedRedisCache(opt => {
-                opt.Configuration = "127.0.0.1";
-                opt.InstanceName = "master";
-            });
+            // services.AddDistributedRedisCache(opt => {
+            //     opt.Configuration = "127.0.0.1";
+            //     opt.InstanceName = "master";
+            // });
             
         }
 

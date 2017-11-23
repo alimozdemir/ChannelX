@@ -27,10 +27,10 @@
     "vue-property-decorator": "5.3.0",
     "vue-router": "2.7.0",
     "vue-template-compiler": "2.4.4",
-    "vuex": "^2.4.1",
-    "vuex-typescript": "^0.1.0",
-    "webpack": "^2.2.0",
-    "webpack-hot-middleware": "^2.12.2"
+    "vuex": "2.4.1",
+    "vuex-typescript": "0.1.0",
+    "webpack": "2.7.0",
+    "webpack-hot-middleware": "2.19.1"
   },
   "dependencies": {}
 }

@@ -194,7 +194,6 @@ namespace ChannelX.Controllers
                             EndAt = i.EndAt,
                             CreatedAt = i.CreatedAt,
                             EngagedUsersName = i.Users.Select(j => j.User.UserName).ToList(),
-                            Duration = (i.EndAt - i.CreatedAt).Hours
                         })
                         .ToListAsync();
 

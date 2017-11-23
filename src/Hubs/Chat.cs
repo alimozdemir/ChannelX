@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using ChannelX.Data;
 using ChannelX.Models.Chat;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -10,9 +11,10 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using ChannelX.Models.Trackers;
-// using ServiceStack.Redis;
-using Microsoft.Extensions.Caching.Redis;
-using Microsoft.Extensions.Caching.Distributed;
+// using StackExchange.Redis;
+// using Microsoft.Extensions.Caching.Redis;
+// using Microsoft.Extensions.Caching.Distributed;
+using ChannelX.Redis;
 
 namespace ChannelX.Hubs
 {
@@ -21,12 +23,26 @@ namespace ChannelX.Hubs
     {
         readonly DatabaseContext _db;
         readonly UserTracker _tracker;
-        readonly IDistributedCache _cache;
-        public Chat(DatabaseContext db, UserTracker tracker, IDistributedCache cache)
+        // readonly IDistributedCache _cache;
+        readonly StackExchange.Redis.IDatabase _redis_db;
+        Boolean connected;
+        // public Chat(DatabaseContext db, UserTracker tracker, IDistributedCache cache)
+        public Chat(DatabaseContext db, UserTracker tracker, IRedisConnectionFactory fact)
         {
             _db = db;
             _tracker = tracker;
-            _cache = cache;
+            // _cache = cache;
+            var conn = fact.Connection();
+            connected = true;
+            if(conn == null)
+            {
+                connected = false;
+            }
+            if(connected)
+            {
+                _redis_db = fact.Connection().GetDatabase();
+            }
+            
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
@@ -62,8 +78,21 @@ namespace ChannelX.Hubs
                 await Clients.Client(Context.ConnectionId).InvokeAsync("UserList", users);
 
                 await Clients.AllExcept(Context.ConnectionId).InvokeAsync("UserJoined", userModel);
+                System.Diagnostics.Debug.WriteLine("Joining");
+                if(connected)
+                {
+                    System.Diagnostics.Debug.WriteLine(Context.ConnectionId);
+                    var messages = _redis_db.ListRange(userDetail.GroupId.ToString(),0,-1);
+                    foreach(var message in messages)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Message:");
+                        System.Diagnostics.Debug.WriteLine(message);
+                        TextModel text = new TextModel { Content = message, User = userModel.Name, Type = 1 };
+                        System.Diagnostics.Debug.WriteLine(text.Content);
+                        await Clients.Client(Context.ConnectionId).InvokeAsync("Receive", text);
+                    }
+                }
             }
-
         }
         
         public async Task Leave()
@@ -79,7 +108,12 @@ namespace ChannelX.Hubs
         {
             var user = await _tracker.Find(Context.ConnectionId);
             TextModel message = new TextModel { Content = model.Content, User = user.Name, Type = 1 };
-            _cache.SetString("lastMessage", model.Content);
+            // _cache.SetString("LastMessage", Convert.ToString(message.Content) );
+            if(connected)
+            {
+                _redis_db.StringSet("LastMessage", message.Content);
+                _redis_db.ListRightPush(user.GroupId.ToString(),message.Content);
+            }
             System.Diagnostics.Debug.WriteLine(model.Content);
             await Clients.AllExcept(Context.ConnectionId).InvokeAsync("Receive", message);
         }
