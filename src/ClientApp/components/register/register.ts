@@ -5,6 +5,7 @@ import axios from 'axios';
 import swal from 'sweetalert';
 import resultModel from '../../models/resultModel';
 
+
 interface registerModel {
     userName: string,
     firstandlastname:string,

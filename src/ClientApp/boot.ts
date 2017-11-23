@@ -28,6 +28,7 @@ const routes = [
         children : [
             { path : '/login', component : require('./components/login/login.vue.html') },
             { path: '/register', component: require('./components/register/register.vue.html') },
+            { path: '/forgotpassword', component: require('./components/forgotpassword/forgotpassword.vue.html') },
         ]
     }
 ]
@@ -59,13 +60,13 @@ axios.interceptors.response.use(response => {
 router.beforeEach((to, from, next) => {
     let auth = localStorage.getItem('auth');
     
-    // if the auth key is exists then go foward
+    // if the auth key is exists then go forward
     // otherwise go login page
     
     if(auth !== undefined && auth){
         next();
     }
-    else if(to.path === '/login' || to.path === '/register') {
+    else if(to.path === '/login' || to.path === '/register' || to.path==='/forgotpassword') {
         next();
     }
     else {
