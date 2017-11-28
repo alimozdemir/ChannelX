@@ -28,17 +28,23 @@ public class AuthMessageSender : IEmailSender
 
         public async Task Execute(string email, string subject, string message)
         {
-
             string toEmail = string.IsNullOrEmpty(email) 
                              ? _emailSettings.ToEmail 
                              : email;
+
+            // If emailsettings.json read failed, code should not process further
+            if (_emailSettings.UsernameEmail == null)
+            {
+                Console.WriteLine("Warning: emailsetting.json is not read! You need a "
+                   + "working SMTP information.");
+                return;
+            }
 
             MailMessage mail = new MailMessage()
             {
                 From = new MailAddress(_emailSettings.UsernameEmail, "ChannelX Staff")
             };
 
-            
             mail.To.Add(new MailAddress(toEmail));
 
             Console.WriteLine("keeeeeeeeeeeeeeeeeeek1");

@@ -33,7 +33,7 @@ namespace ChannelX.Controllers
         {
 
             // SMTP TEST START
-            // await _emailSender.SendEmailAsync("itu.channelx@gmail.com", "subject", "Enter email body here");
+            await _emailSender.SendEmailAsync("itu.channelx@gmail.com", "subject", "Enter email body here");
             // -----SMTP TEST END
 
             var result = new ResultModel();
