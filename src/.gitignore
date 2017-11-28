@@ -239,3 +239,4 @@ _Pvt_Extensions
 .fake/
 
 package-lock.json
+emailsettings.json

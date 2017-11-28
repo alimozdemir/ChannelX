@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using ChannelX.Data;
+using ChannelX.Email;
 using ChannelX.Models;
 using ChannelX.Models.Channel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -20,14 +21,21 @@ namespace ChannelX.Controllers
     public class ChannelController : Controller
     {
         readonly DatabaseContext _db;
-        public ChannelController(DatabaseContext db)
+        readonly IEmailSender _emailSender;
+        public ChannelController(DatabaseContext db, IEmailSender emailSender)
         {
             _db = db;
+            _emailSender = emailSender;
         }
 
         [HttpPost("[action]")]
         public async Task<IActionResult> Create([FromBody]CreateModel model)
         {
+
+            // SMTP TEST START
+            // await _emailSender.SendEmailAsync("itu.channelx@gmail.com", "subject", "Enter email body here");
+            // -----SMTP TEST END
+
             var result = new ResultModel();
 
             if (ModelState.IsValid) // if model is valid with data annotations

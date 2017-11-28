@@ -15,14 +15,20 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Primitives;
 // using Microsoft.Extensions.Caching.Redis;
 using ChannelX.Redis;
+using ChannelX.Email;
 
 namespace ChannelX
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("emailsettings.json", optional: true)
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -84,6 +90,13 @@ namespace ChannelX
             services.AddSignalR();
 
             services.AddSingleton<Models.Trackers.UserTracker>();
+
+            // EMAIL PART
+            // load email settings if it is avaliable
+            services.Configure<Models.Configuration.EmailSettings>(Configuration.GetSection("EmailSettings"));
+            // Registering email service
+            services.AddTransient<IEmailSender, AuthMessageSender>();
+            // -----EMAIL PART END
 
             // services.AddDistributedRedisCache(opt => {
             //     opt.Configuration = "127.0.0.1";
