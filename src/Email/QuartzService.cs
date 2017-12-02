@@ -31,15 +31,14 @@ namespace ChannelX.Email
                     
                     // and start it off
                     await scheduler.Start();
-
                     IJobDetail fc = JobBuilder.Create<SendBulkEmail>()
-                        .WithIdentity("SendBulkEmail")
+                        .WithIdentity("SendBulkEmail", "channelx")
                         .Build();
 
                     ITrigger fct = TriggerBuilder.Create()
-                        .WithIdentity("BulkEmailTrigger")
-                        // .StartNow()
-                        .StartAt(DateTime.Now.AddMinutes(1))
+                        .WithIdentity("BulkEmailTrigger", "channelx")
+                         .StartNow()
+                        //.StartAt(DateTime.Now.AddMinutes(1))
                         // .WithCronSchedule("0 22 * * 0") // “At 22:00 on Sunday.”
                         .WithSimpleSchedule(x => x
                             .WithIntervalInSeconds(30)
@@ -51,8 +50,8 @@ namespace ChannelX.Email
 
                     // Tell quartz to schedule the job using our trigger
                     Console.WriteLine("Starting the scheduler");
-                    await scheduler.ScheduleJob(fc, fct);
-                    Console.WriteLine("Scheduler started!");
+                    var test = await scheduler.ScheduleJob(fc, fct);
+                    Console.WriteLine("Scheduler started! {0}", test);
                 }
                 catch (SchedulerException se)
                 {

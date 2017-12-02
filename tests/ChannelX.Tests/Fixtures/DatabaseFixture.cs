@@ -15,8 +15,6 @@ namespace ChannelX.Tests.Fixtures
                     .UseInMemoryDatabase("InMemory");
 
             context = new DatabaseContext(builder.Options);
-
-            
         }
 
         public void InitChannels()

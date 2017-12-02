@@ -1,46 +1,32 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
+using ChannelX.Data;
+using ChannelX.Redis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.SpaServices.Webpack;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Primitives;
-// using Microsoft.Extensions.Caching.Redis;
-using ChannelX.Redis;
-using ChannelX.Email;
+using Microsoft.IdentityModel.Tokens;
 
-namespace ChannelX
+namespace ChannelX.Tests
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile("emailsettings.json", optional: true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<DatabaseContext>(o => o.UseInMemoryDatabase("InMemoryDb"));
 
-            services.AddDbContext<Data.DatabaseContext>(o => {
-                o.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
-            });
-             	
+
             services.AddSingleton<IRedisConnectionFactory, RedisConnectionFactory>();
             services.AddIdentity<Data.ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<Data.DatabaseContext>()
@@ -53,6 +39,8 @@ namespace ChannelX
 
             var tokenConfiguration = Configuration.GetSection("Tokens");
 
+            Console.WriteLine(tokenConfiguration.GetValue<string>("Key"));
+
             services.AddAuthentication()
                     .AddJwtBearer(options => {
                         options.TokenValidationParameters = new TokenValidationParameters
@@ -62,9 +50,9 @@ namespace ChannelX
                             ValidateLifetime = true,
                             ValidateIssuerSigningKey = true,
 
-                            ValidIssuer = tokenConfiguration.GetValue<string>("Issuer"),
-                            ValidAudience = tokenConfiguration.GetValue<string>("Audience"),
-                            IssuerSigningKey = Token.JwtSecurityHelper.Key(tokenConfiguration.GetValue<string>("Key"))
+                            ValidIssuer = "ChannelX",
+                            ValidAudience = "ChannelX",
+                            IssuerSigningKey = Token.JwtSecurityHelper.Key("5fdc4141-0815-4fa9-8c69-f25200e1831a")
                         };
                         
                         options.SaveToken = true;
@@ -90,41 +78,14 @@ namespace ChannelX
             services.AddSignalR();
 
             services.AddSingleton<Models.Trackers.UserTracker>();
-
-            // EMAIL PART
-            // load email settings if it is avaliable
-            services.Configure<Models.Configuration.EmailSettings>(Configuration.GetSection("EmailSettings"));
-            // Registering email service
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-            // Registering true email service
-
-            services.AddScoped<SendBulkEmail>();
-            services.AddQuartz();
-            // -----EMAIL PART END
-
-            // services.AddDistributedRedisCache(opt => {
-            //     opt.Configuration = "127.0.0.1";
-            //     opt.InstanceName = "master";
-            // });
-            
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime lifetime)
+        public void Configure(IApplicationBuilder app)
         {
-
-            if (env.IsDevelopment())
+            /*using(var context = app.ApplicationServices.GetService<DatabaseContext>())
             {
-                app.UseDeveloperExceptionPage();
-                app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
-                {
-                    HotModuleReplacement = true
-                });
-            }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-            }
+                InitializeDatabase(context);
+            }*/
 
             app.UseStaticFiles();
 
@@ -145,6 +106,32 @@ namespace ChannelX
                     name: "spa-fallback",
                     defaults: new { controller = "Home", action = "Index" });
             });
+
+            SetApplicationUsers(app);
         }
+
+        public void InitializeDatabase(DatabaseContext context)
+        {
+            context.Channels.Add(new Channel() {
+                CreatedAt = DateTime.Now,
+                EndAt = DateTime.Now.AddHours(5),
+                Title = "FirstOne"
+            });
+        }
+
+        public void SetApplicationUsers(IApplicationBuilder app) 
+        {
+            var _userManager = app.ApplicationServices.GetService<UserManager<ApplicationUser>>();
+            {
+                Console.WriteLine(_userManager == null ? "is null" : "not null");
+                var user = new ApplicationUser { UserName = "deneme",FirstAndLastName="alim",Email = "ozdemirali@itu.edu.tr" };
+                _userManager.CreateAsync(user, "Deneme123!");
+            }
+        }
+
+        /*public IEnumerable<Channel> GetChannelSession()
+        {
+
+        }*/
     }
 }
