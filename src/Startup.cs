@@ -93,9 +93,11 @@ namespace ChannelX
 
             // EMAIL PART
             // load email settings if it is avaliable
-            services.Configure<Models.Configuration.EmailSettings>(Configuration.GetSection("EmailSettings"));
+            // services.Configure<Models.Configuration.EmailSettings>(Configuration.GetSection("EmailSettings"));
             // Registering email service
-            services.AddTransient<IEmailSender, AuthMessageSender>();
+            // services.AddTransient<IEmailSender, AuthMessageSender>();
+            // Registering true email service
+            services.AddQuartz();
             // -----EMAIL PART END
 
             // services.AddDistributedRedisCache(opt => {
@@ -106,8 +108,9 @@ namespace ChannelX
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime lifetime)
         {
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
