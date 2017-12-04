@@ -135,13 +135,13 @@ namespace ChannelX.Controllers
                             _db.ChannelUsers.Add(new ChannelUser()
                             {
                                 UserId = userId,
-                                ChannelId = model.Id
+                                ChannelId = model.Id,
+                                State = (int)UserStates.Joined
                             });
 
                             var affected = await _db.SaveChangesAsync();
                             if (affected == 1)
                             {
-                                var getModel = new GetModel();
                                 result.Data = FillTheModel(data);
                                 result.Succeeded = true;
                             }
@@ -169,13 +169,13 @@ namespace ChannelX.Controllers
                     _db.ChannelUsers.Add(new ChannelUser()
                     {
                         UserId = userId,
-                        ChannelId = model.Id
+                        ChannelId = model.Id,
+                        State = (int)UserStates.Joined
                     });
 
                     var affected = await _db.SaveChangesAsync();
                     if (affected == 1)
                     {
-                        var getModel = new GetModel();
                         result.Data = FillTheModel(data);
                         result.Succeeded = true;
                     }

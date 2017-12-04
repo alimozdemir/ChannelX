@@ -15,9 +15,12 @@ interface getModel {
     createdAt: Date
 }
 
-interface userModel {
+interface userDetail {
+    UserId: string,
+    ConnectionId: string,
     Name: string,
-    Owner: boolean
+    GroupId: string,
+    Authorized: boolean
 }
 
 interface textModel {
@@ -35,27 +38,27 @@ const chatAPI: string = "api/chat?token=" + localStorage.getItem('auth');
         // if user switch between channels, the vue router does not re-construct the component
         // thus, we have to call fetchData when the $route object changed
         '$route': 'fetchData',
-        'chats' : 'toBottom'
+        'chats': 'toBottom'
     }
 })
 export default class ChannelOpenComponent extends Vue {
     id: number = 0;
     model: getModel = Object.assign({}, defaultGetModel);
     text: string = "";
-
+    loading: boolean = false;
     chats: textModel[] = [];
     connection: HubConnection | null = null;
-    users: userModel[] = [];
+    users: userDetail[] = [];
 
-    toBottom(){
-        
+    toBottom() {
+
         let chat = document.getElementsByClassName('chat')[0];
 
         chat.scrollTop = chat.scrollHeight;
     }
 
     async fetchData() {
-
+        this.loading = true;
         if (this.connection !== null) {
             this.connection.invoke('leave');
             this.connection.stop();
@@ -69,7 +72,6 @@ export default class ChannelOpenComponent extends Vue {
 
         if (get.status == 200) {
             let result = get.data as resultModel;
-
             if (result.prompt) {
 
                 var password = await swal({
@@ -121,6 +123,7 @@ export default class ChannelOpenComponent extends Vue {
         this.connection = new HubConnection(chatAPI, {});
 
         await this.connection.start();
+        this.loading = false;
         this.connection.on('userList', this.userList);
         this.connection.on('userLeft', this.userLeft);
         this.connection.on('userJoined', this.userJoined)
@@ -129,30 +132,33 @@ export default class ChannelOpenComponent extends Vue {
         this.connection.invoke('join', { channelId: this.id });
     }
 
-    userList(users: userModel[]) {
+    userList(users: userDetail[]) {
         this.users = users;
+        console.log(users, "test")
     }
 
-    userLeft(user: userModel) {
-        let index = this.users.findIndex(i => i.Name == user.Name);
+    userLeft(user: userDetail) {
+        let index = this.users.findIndex(i => i.ConnectionId == user.ConnectionId);
         if (index > -1) {
-            var model: textModel = { Content :this.users[index].Name + ' is left the channel.', Type : 3, User : 'Me' };
+            var model: textModel = { Content: this.users[index].Name + ' is left the channel.', Type: 3, User: 'Me' };
             this.users.splice(index, 1);
             this.chats.push(model)
         }
     }
 
-    userJoined(user: userModel) {
-        var model: textModel = { Content :user.Name + ` is join the channel.`, Type : 3, User : 'Me' };
-        this.chats.push(model);
-        this.users.push(user);
+    userJoined(user: userDetail) {
+        let index = this.users.findIndex(i => i.ConnectionId === user.ConnectionId);
+
+        if(index == -1) {
+            var model: textModel = { Content: user.Name + ` is join the channel.`, Type: 3, User: 'Me' };
+            this.chats.push(model);
+            this.users.push(user);
+        }
     }
     send() {
         if (this.connection !== null && this.text !== "" && this.text !== undefined) {
-            var model: textModel = { Content :this.text, Type : 2, User : 'Me' };
+            var model: textModel = { Content: this.text, Type: 2, User: 'Me' };
             this.connection.invoke('send', model)
-
-            this.chats.push(model)
 
             this.text = "";
         }

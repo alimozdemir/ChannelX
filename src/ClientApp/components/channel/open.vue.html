@@ -1,7 +1,7 @@
 <template>
 
     <div class="row">
-
+        <div v-if="loading" class="loading">Loading&#8230;</div>
         <div class="col-md-10 main">
 
             <div class="chat">
@@ -32,8 +32,8 @@
                     {{item.Name}}
                     <a  href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-option-vertical"></span></a>
                     <ul class="dropdown-menu">
-                      <li><a href="#">Block User</a></li>
-                      <li><a href="#">Kick User</a></li>
+                      <li><a href="#">Block</a></li>
+                      <li><a href="#">Kick</a></li>
                       <li><a href="#">Authorize</a></li>
                     </ul>
                   </div>
