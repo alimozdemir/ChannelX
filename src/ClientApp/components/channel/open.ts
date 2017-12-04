@@ -25,9 +25,7 @@ interface userDetail {
 
 interface textModel {
     Content: string,
-    User: string,
-    Type: number,
-
+    User: userDetail | undefined
 }
 
 const defaultGetModel: getModel = { id: 0, title: "", endAt: new Date(), createdAt: new Date() };
@@ -108,9 +106,13 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async mounted() {
-        await this.fetchData();
-
         this.userId = UserStore.readUserId(this.$store);
+
+
+        // due to file load order problem, 
+        // we have to wait a little for loading axios settings.
+        setTimeout(async () => {await this.fetchData(); }, 100)
+
     }
 
     async destroyed() {
@@ -143,7 +145,8 @@ export default class ChannelOpenComponent extends Vue {
     userLeft(user: userDetail) {
         let index = this.users.findIndex(i => i.ConnectionId == user.ConnectionId);
         if (index > -1) {
-            var model: textModel = { Content: this.users[index].Name + ' is left the channel.', Type: 3, User: 'Me' };
+            let me = this.users.findIndex(i => i.UserId === this.userId);
+            let model: textModel = { Content: this.users[index].Name + ' is left the channel.', User : undefined };
             this.users.splice(index, 1);
             this.chats.push(model)
         }
@@ -153,14 +156,19 @@ export default class ChannelOpenComponent extends Vue {
         let index = this.users.findIndex(i => i.ConnectionId === user.ConnectionId);
 
         if(index == -1) {
-            var model: textModel = { Content: user.Name + ` is join the channel.`, Type: 3, User: 'Me' };
+            let me = this.users.findIndex(i => i.UserId === this.userId);
+
+            let model: textModel = { Content: user.Name + ` is join the channel.`, User : undefined };
             this.chats.push(model);
             this.users.push(user);
         }
     }
     send() {
         if (this.connection !== null && this.text !== "" && this.text !== undefined) {
-            var model: textModel = { Content: this.text, Type: 2, User: 'Me' };
+
+            let me = this.users.findIndex(i => i.UserId === this.userId);
+
+            let model: textModel = { Content: this.text, User: this.users[me] };
             this.connection.invoke('send', model)
 
             this.text = "";

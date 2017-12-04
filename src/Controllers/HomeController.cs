@@ -45,7 +45,7 @@ namespace ChannelX.Controllers
         {
             var claims = User.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier);
 
-            return Json("Auth");
+            return Json(User.GetUserId());
         }
 
         public async Task<IActionResult> Test2()

@@ -99,12 +99,16 @@ namespace ChannelX.Hubs
                 if(connected)
                 {
                     System.Diagnostics.Debug.WriteLine(Context.ConnectionId);
+                    // *** ALIM
+                    var currentUser = await _tracker.Find(Context.ConnectionId);
+
                     var messages = _redis_db.ListRange(userDetail.GroupId.ToString(),0,-1);
                     foreach(var message in messages)
                     {
                         System.Diagnostics.Debug.WriteLine("Message:");
                         System.Diagnostics.Debug.WriteLine(message);
-                        TextModel text = new TextModel { Content = message, User = userDetail.Name, Type = 1 }; // burada bi sıkıntı var gibi abi, user da redisden gelmesi gerek gibi 
+                        // Burada değişmesi gereken, kullanıcı bilgilerinin redisden gelmesi 
+                        TextModel text = new TextModel { Content = message, User = currentUser };
                         System.Diagnostics.Debug.WriteLine(text.Content);
                         await Clients.Client(Context.ConnectionId).InvokeAsync("Receive", text);
                     }
@@ -124,7 +128,7 @@ namespace ChannelX.Hubs
         {
             var user = await _tracker.Find(Context.ConnectionId);
             
-            TextModel message = new TextModel { Content = model.Content, User = user.Name, Type = 1 };
+            TextModel message = new TextModel { Content = model.Content, User = user };
             // _cache.SetString("LastMessage", Convert.ToString(message.Content) );
             if(connected)
             {

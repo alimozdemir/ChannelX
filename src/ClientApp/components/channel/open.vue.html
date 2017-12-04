@@ -3,15 +3,14 @@
     <div class="row">
         <div v-if="loading" class="loading">Loading&#8230;</div>
         <div class="col-md-10 main">
-
+            {{userId}}
             <div class="chat">
                 <ul>
 
-                    <li v-for="item in chats" v-bind:class="{ 'receive' : item.Type == 1, 'send' : item.Type == 2, 'notify' : item.Type == 3 }">
+                    <li v-for="item in chats" v-bind:class="{ 'receive' : item.User && item.User.UserId !== userId, 'send' : item.User && item.User.UserId === userId, 'notify' : !item.User }">
                         <div class="msg">
-                                <span v-if="item.Type == 1">{{item.User}} : </span> 
+                                <span v-if="item.User && item.User.UserId !== userId">{{item.User.Name}} : </span> 
                               
-                             
                              {{item.Content}}
                         </div>
                     </li>

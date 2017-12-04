@@ -7,10 +7,13 @@ import axios from 'axios';
 import VeeValidate from 'vee-validate';
 import Vuex, { Store } from 'vuex'
 import { createStore, State } from './stores/store'
+import { UserStore } from './stores/userState'
 
 Vue.use(VueRouter);
 Vue.use(VeeValidate);
 Vue.use(Vuex);
+
+let stores = createStore();
 
 const routes = [
     {
@@ -35,12 +38,24 @@ const routes = [
     }
 ]
 
-
 var router = new VueRouter({ mode: 'history', routes: routes });
+
+var app = new Vue({
+    el: '#app-root',
+    router: router,
+    render: h => h(require('./layouts/main.vue.html')),
+    store: stores
+});
 
 // add the auth key to every request of axios
 axios.interceptors.request.use(request => {
-    let auth = localStorage.getItem('auth');
+    // let auth = localStorage.getItem('auth');
+    // make sure auth is dispatched
+    UserStore.dispatchAuthKey(app.$store);
+
+    let auth = UserStore.readAuthKey(app.$store);
+    let userId = UserStore.readUserId(app.$store)
+    console.log("[AXIOS INTERCEPTOR]", request, auth, userId);
 
     if(auth !== undefined && auth)
         request.headers.common['Authorization'] = 'Bearer ' + auth;
@@ -53,16 +68,17 @@ axios.interceptors.response.use(response => {
 }, error => {
     // if unauthorized request then remove the auth key and route to login page
     if(error.response.status === 401){
-        console.log(localStorage.getItem('auth'))
-        localStorage.removeItem('auth');
+        console.log("[AXIOS]", error)
+        UserStore.commitAuthKey(app.$store, "");
+        UserStore.commitUserId(app.$store, "");
+        
         router.push('/login');
     }
 });
 
-
 router.beforeEach((to, from, next) => {
-    let auth = localStorage.getItem('auth');
-    
+    let auth = UserStore.readAuthKey(app.$store);
+    console.log("[beforeEach]", auth)
     // if the auth key is exists then go forward
     // otherwise go login page
     
@@ -78,10 +94,5 @@ router.beforeEach((to, from, next) => {
 
 });
 
-let stores = createStore();
-new Vue({
-    el: '#app-root',
-    router: router,
-    render: h => h(require('./layouts/main.vue.html')),
-    store: stores
-});
+
+

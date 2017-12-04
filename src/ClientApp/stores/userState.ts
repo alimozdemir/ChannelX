@@ -13,7 +13,8 @@ type UserContext = ActionContext<UserState, RootState>;
 export const userController = {
     namespaced: true,
     state: {
-        value: 0,
+        userId: "",
+        authKey: ""
     },
 
     getters: {
@@ -31,13 +32,18 @@ export const userController = {
         },
         setAuthKey(state: UserState, value: string){
             state.authKey = value;
-            localStorage.setItem('auth', value);
+            console.log("[setAuthKey]", value)
+            if(value === "")
+                localStorage.removeItem('auth');
+            else
+                localStorage.setItem('auth', value);
         }
     },
 
     actions: {
         dispatchAuthKey (context : UserContext){
             let val = localStorage.getItem('auth');
+            console.log("[dispatchAuthKey]", val)
             if(val == undefined)
                 val = '';
             commitAuthKey(context, val);

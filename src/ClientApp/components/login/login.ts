@@ -32,8 +32,7 @@ export default class LoginComponent extends Vue {
                 UserStore.commitAuthKey(this.$store, userData.auth);
                 UserStore.commitUserId(this.$store, userData.userId);
                 console.log(userData)
-                console.log(this.$store)
-                
+                console.log(UserStore.readAuthKey(this.$store))
                 this.$router.push('/');
             }
             else
