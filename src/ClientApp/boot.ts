@@ -5,9 +5,12 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import axios from 'axios';
 import VeeValidate from 'vee-validate';
+import Vuex, { Store } from 'vuex'
+import { createStore, State } from './stores/store'
 
 Vue.use(VueRouter);
 Vue.use(VeeValidate);
+Vue.use(Vuex);
 
 const routes = [
     {
@@ -50,6 +53,7 @@ axios.interceptors.response.use(response => {
 }, error => {
     // if unauthorized request then remove the auth key and route to login page
     if(error.response.status === 401){
+        console.log(localStorage.getItem('auth'))
         localStorage.removeItem('auth');
         router.push('/login');
     }
@@ -74,8 +78,10 @@ router.beforeEach((to, from, next) => {
 
 });
 
+let stores = createStore();
 new Vue({
     el: '#app-root',
     router: router,
-    render: h => h(require('./layouts/main.vue.html'))
+    render: h => h(require('./layouts/main.vue.html')),
+    store: stores
 });

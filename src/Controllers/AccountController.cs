@@ -47,7 +47,8 @@ namespace ChannelX.Controllers
                     var token = _jwtHelper.GetToken(user.Id);
                     var key = _jwtHelper.GetTokenValue(token);
                     result.Succeeded = true;
-                    result.Data = key;
+                    UserData data = new UserData(key, User.GetUserId());
+                    result.Data = data;
                 }
                 else if (signResult.IsNotAllowed)
                     result.Message = "The user is banned.";

@@ -5,8 +5,8 @@ import signalR, { HubConnection } from '@aspnet/signalr-client';
 import axios from 'axios';
 import resultModel from '../../models/resultModel';
 import swal from 'sweetalert';
+import { UserStore } from '../../stores/userState'
 import './open.css';
-
 
 interface getModel {
     id: number,
@@ -31,7 +31,7 @@ interface textModel {
 }
 
 const defaultGetModel: getModel = { id: 0, title: "", endAt: new Date(), createdAt: new Date() };
-const chatAPI: string = "api/chat?token=" + localStorage.getItem('auth');
+const chatAPI: string = "api/chat?token=";
 
 @Component({
     watch: {
@@ -49,6 +49,7 @@ export default class ChannelOpenComponent extends Vue {
     chats: textModel[] = [];
     connection: HubConnection | null = null;
     users: userDetail[] = [];
+    userId: string = "";
 
     toBottom() {
 
@@ -108,6 +109,8 @@ export default class ChannelOpenComponent extends Vue {
 
     async mounted() {
         await this.fetchData();
+
+        this.userId = UserStore.readUserId(this.$store);
     }
 
     async destroyed() {
@@ -119,8 +122,9 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async getLogs() {
-
-        this.connection = new HubConnection(chatAPI, {});
+        let url = chatAPI + UserStore.readAuthKey(this.$store);
+        console.log(url)
+        this.connection = new HubConnection(url, {});
 
         await this.connection.start();
         this.loading = false;
@@ -134,7 +138,6 @@ export default class ChannelOpenComponent extends Vue {
 
     userList(users: userDetail[]) {
         this.users = users;
-        console.log(users, "test")
     }
 
     userLeft(user: userDetail) {
