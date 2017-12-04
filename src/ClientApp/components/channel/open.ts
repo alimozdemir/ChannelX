@@ -55,6 +55,7 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async fetchData() {
+
         if (this.connection !== null) {
             this.connection.invoke('leave');
             this.connection.stop();

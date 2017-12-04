@@ -99,3 +99,22 @@ container.scrollTop = container.scrollHeight;
         margin-top:10px;
         border-radius: 5px !important; 
     }
+
+    .user {
+        padding: 5px;
+        padding-left: 10px;
+        border-top:1px solid #eee;
+    }
+
+    .user:last-child{
+        border-bottom: 1px solid #eee;
+        margin-bottom: 10px;
+    }
+
+    .user:hover {
+        background: #eee;
+    }
+
+    .user > a {
+        float:right;
+    }
