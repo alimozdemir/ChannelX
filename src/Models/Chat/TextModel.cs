@@ -1,5 +1,6 @@
 using System;
 using ChannelX.Models.Trackers;
+using Newtonsoft.Json;
 
 namespace ChannelX.Models.Chat
 {
@@ -7,5 +8,10 @@ namespace ChannelX.Models.Chat
     {
         public string Content { get; set; }
         public UserDetail User { get; set; }
+
+        public override string ToString()
+        {
+                return JsonConvert.SerializeObject(this);
+        }
     }
 }
