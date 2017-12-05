@@ -17,7 +17,7 @@ const defaultModel : createModel = { title: "", isPrivate: true, password: "", e
 @Component
 export default class ChannelCreateComponent extends Vue {
     model: createModel = Object.assign({}, defaultModel); //shallow copy
-
+    
     async submit() {
         let result = await axios.post('/api/Channel/Create', this.model);
         

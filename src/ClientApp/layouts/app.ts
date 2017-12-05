@@ -19,7 +19,7 @@ export default class AppComponent extends Vue {
     async mounted() {
         var that = this
         setTimeout(async function(){
-
+            
             var result = await axios.get('/Home/Test');
             if(result.status !== 200){
                 //this.$router.push('/login');

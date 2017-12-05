@@ -6,6 +6,7 @@ import axios from 'axios';
 import resultModel from '../../models/resultModel';
 import swal from 'sweetalert';
 import { UserStore } from '../../stores/userState'
+import UserComponent from "../user/user";
 import './open.css';
 
 interface getModel {
@@ -175,6 +176,7 @@ export default class ChannelOpenComponent extends Vue {
             this.users.push(user);
         }
     }
+
     send() {
         if (this.connection !== null && this.text !== "" && this.text !== undefined) {
 
@@ -186,7 +188,15 @@ export default class ChannelOpenComponent extends Vue {
             this.text = "";
         }
     }
+
     receive(msg: textModel) {
         this.chats.push(msg);
+    }
+
+    async showUser(id: string){
+        let popup = new UserComponent(id);
+        this.loading = true;
+        await popup.show();
+        this.loading = false;
     }
 }

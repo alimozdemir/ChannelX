@@ -3,6 +3,7 @@ import { Component } from 'vue-property-decorator';
 import axios from 'axios';
 import { UserStore } from '../../stores/userState'
 import './topmenu.css';
+import UserComponent from '../user/user';
 
 @Component({
     computed : {
@@ -13,10 +14,16 @@ import './topmenu.css';
 })
 export default class TopMenuComponent extends Vue {
 
-    
     mounted() {
 
         
+    }
+    
+    async showMe(){
+        let id = UserStore.readUserId(this.$store);
+        let popup = new UserComponent(id);
+
+        await popup.show();
     }
 
     logout(){

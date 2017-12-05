@@ -84,5 +84,29 @@ namespace ChannelX.Controllers
             
             return Json(result);
         }
+
+        [HttpGet("[action]"), Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> GetUser(string Id)
+        {
+            ResultModel result = new ResultModel();
+
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByIdAsync(Id);
+
+                if (user != null)
+                {
+                    result.Succeeded = true;
+                    var data = new GetUser(user.Id, user.UserName, user.FirstAndLastName, user.Email);
+                    result.Data = data;
+                }
+                else
+                    result.Message = "User is not found.";
+
+            }
+
+            return Json(result);
+        }
+        
     }
 }
