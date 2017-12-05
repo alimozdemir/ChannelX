@@ -55,7 +55,6 @@ axios.interceptors.request.use(request => {
 
     let auth = UserStore.readAuthKey(app.$store);
     let userId = UserStore.readUserId(app.$store)
-    console.log("[AXIOS INTERCEPTOR]", request, auth, userId);
 
     if(auth !== undefined && auth)
         request.headers.common['Authorization'] = 'Bearer ' + auth;
@@ -68,7 +67,6 @@ axios.interceptors.response.use(response => {
 }, error => {
     // if unauthorized request then remove the auth key and route to login page
     if(error.response.status === 401){
-        console.log("[AXIOS]", error)
         UserStore.commitAuthKey(app.$store, "");
         UserStore.commitUserId(app.$store, "");
         
@@ -78,7 +76,6 @@ axios.interceptors.response.use(response => {
 
 router.beforeEach((to, from, next) => {
     let auth = UserStore.readAuthKey(app.$store);
-    console.log("[beforeEach]", auth)
     // if the auth key is exists then go forward
     // otherwise go login page
     

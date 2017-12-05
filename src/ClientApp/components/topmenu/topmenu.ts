@@ -4,13 +4,25 @@ import axios from 'axios';
 import { UserStore } from '../../stores/userState'
 import './topmenu.css';
 
-@Component
+@Component({
+    computed : {
+        getUserName(){
+            return UserStore.readUserName(this.$store);
+        }
+    }
+})
 export default class TopMenuComponent extends Vue {
+
+    
+    mounted() {
+
+        
+    }
+
     logout(){
         
         UserStore.commitUserId(this.$store, "");
         UserStore.commitAuthKey(this.$store, "");
-
         // to stop infinite interval
         let id = localStorage.getItem('interval');
 

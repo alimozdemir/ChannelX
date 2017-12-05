@@ -7,7 +7,5 @@ import { UserStore } from '../../stores/userState';
 export default class HomeComponent extends Vue {
     mounted()
     {
-        console.log(UserStore.readAuthKey(this.$store), this.$store);
-        console.log(UserStore.readUserId(this.$store));
     }
 }

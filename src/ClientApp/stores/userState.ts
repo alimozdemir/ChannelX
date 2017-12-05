@@ -4,7 +4,8 @@ import { State as RootState } from "./store";
 
 export interface UserState {
     userId : string,
-    authKey : string
+    authKey : string,
+    userName: string
 }
 
 type UserContext = ActionContext<UserState, RootState>;
@@ -14,7 +15,8 @@ export const userController = {
     namespaced: true,
     state: {
         userId: "",
-        authKey: ""
+        authKey: "",
+        userName: ""
     },
 
     getters: {
@@ -23,6 +25,9 @@ export const userController = {
         },
         getAuthKey(state: UserState){
             return state.authKey;
+        },
+        getUserName(state: UserState){
+            return state.userName;
         }
     },
 
@@ -30,9 +35,12 @@ export const userController = {
         setUserId(state: UserState, value: string) {
             state.userId = value;
         },
+
+        setUserName(state: UserState, value: string) {
+            state.userName = value;
+        },
         setAuthKey(state: UserState, value: string){
             state.authKey = value;
-            console.log("[setAuthKey]", value)
             if(value === "")
                 localStorage.removeItem('auth');
             else
@@ -43,7 +51,6 @@ export const userController = {
     actions: {
         dispatchAuthKey (context : UserContext){
             let val = localStorage.getItem('auth');
-            console.log("[dispatchAuthKey]", val)
             if(val == undefined)
                 val = '';
             commitAuthKey(context, val);
@@ -63,7 +70,9 @@ export const commitAuthKey = commit(mutations.setAuthKey);
 export const UserStore = {
     readUserId : read(getters.getUserId),
     readAuthKey : read(getters.getAuthKey),
+    readUserName: read(getters.getUserName),
     dispatchAuthKey : dispatch(actions.dispatchAuthKey),
     commitAuthKey: commit(mutations.setAuthKey),
-    commitUserId: commit(mutations.setUserId)
+    commitUserId: commit(mutations.setUserId),
+    commitUserName: commit(mutations.setUserName)
 }

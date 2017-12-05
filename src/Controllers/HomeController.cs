@@ -44,8 +44,9 @@ namespace ChannelX.Controllers
         public IActionResult Test()
         {
             var claims = User.Claims.FirstOrDefault(i => i.Type == ClaimTypes.NameIdentifier);
-
-            return Json(User.GetUserId());
+            var userId = User.GetUserId();
+            var user = _userManager.Users.FirstOrDefault(i => i.Id.Equals(userId));
+            return Json(new { UserId = User.GetUserId(), UserName = string.IsNullOrEmpty(user.FirstAndLastName) ? user.UserName : user.FirstAndLastName  });
         }
 
         public async Task<IActionResult> Test2()

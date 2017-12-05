@@ -3,6 +3,12 @@ import { Component } from 'vue-property-decorator';
 import axios from 'axios';
 import { UserStore } from '../stores/userState'
 
+interface userData {
+    userId: string,
+    userName: string
+}
+
+
 @Component({
     components: {
         MenuComponent: require('../components/navmenu/navmenu.vue.html'),
@@ -19,9 +25,10 @@ export default class AppComponent extends Vue {
                 //this.$router.push('/login');
             }
             else{
-                let userId = result.data as string;
-                console.log("[APP]", userId)
-                await UserStore.commitUserId(that.$store, userId);
+                let user = result.data as userData;
+                
+                await UserStore.commitUserId(that.$store, user.userId);
+                await UserStore.commitUserName(that.$store, user.userName);
             }
 
         }, 100)
