@@ -56,7 +56,10 @@ namespace ChannelX.Hubs
             var userId = Context.User.GetUserId();
             var user = await _db.Users.FindAsync(userId);
             var channel = await _db.Channels.FindAsync(model.ChannelId);
-            var userEngage = await _db.ChannelUsers.FirstOrDefaultAsync(i => i.ChannelId.Equals(model.ChannelId) && i.UserId.Equals(userId));
+            var engagedUsers = await _db.ChannelUsers.Include(i => i.User)
+                                .Where(i => i.ChannelId.Equals(model.ChannelId)).ToListAsync();
+
+            var userEngage = engagedUsers.FirstOrDefault(i => i.ChannelId.Equals(model.ChannelId) && i.UserId.Equals(userId));
             if(user != null && channel != null)
             {
                 if(!userId.Equals(channel.OwnerId))
@@ -82,7 +85,19 @@ namespace ChannelX.Hubs
 
                 _tracker.Add(Context.Connection, userDetail);
                 
-                var users = await _tracker.All(userDetail.GroupId);
+                // online users
+                var users = (await _tracker.All(userDetail.GroupId)).ToList();
+
+                // all users that engaged with this channel
+                foreach(var item in engagedUsers){
+                    if (!users.Any(i => i.UserId.Equals(item.UserId))) 
+                    {
+                        users.Add(new UserDetail(string.Empty, 
+                                item.User.UserName, 
+                                model.ChannelId.ToString(), 
+                                item.State == (int)UserStates.Authorize, item.UserId) );
+                    }
+                }
 
                 await Clients.Client(Context.ConnectionId).InvokeAsync("UserList", users);
                 

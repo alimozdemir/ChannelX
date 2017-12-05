@@ -48,7 +48,18 @@ export default class ChannelOpenComponent extends Vue {
     connection: HubConnection | null = null;
     users: userDetail[] = [];
     userId: string = "";
+    user: userDetail | null = null;
 
+    me(users: userDetail[]) {
+        let index = users.findIndex(i => i.UserId === this.userId);
+        
+        if(index > -1)
+            this.user = users[index];
+        else
+            this.user = null;
+
+        console.log(this.user, index, this.userId, users)
+    }
     toBottom() {
 
         let chat = document.getElementsByClassName('chat')[0];
@@ -57,7 +68,7 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async fetchData() {
-        this.loading = true;
+        console.log(this.userId);
         if (this.connection !== null) {
             this.connection.invoke('leave');
             this.connection.stop();
@@ -106,12 +117,11 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async mounted() {
-        this.userId = UserStore.readUserId(this.$store);
-
-
+        
+        this.loading = true;
         // due to file load order problem, 
         // we have to wait a little for loading axios settings.
-        setTimeout(async () => {await this.fetchData(); }, 100)
+        setTimeout(async () => {await this.fetchData(); }, 200)
 
     }
 
@@ -124,21 +134,23 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async getLogs() {
+        this.userId = await UserStore.readUserId(this.$store);
         let url = chatAPI + UserStore.readAuthKey(this.$store);
         console.log(url)
         this.connection = new HubConnection(url, {});
 
         await this.connection.start();
-        this.loading = false;
         this.connection.on('userList', this.userList);
         this.connection.on('userLeft', this.userLeft);
         this.connection.on('userJoined', this.userJoined)
         this.connection.on('receive', this.receive)
 
         this.connection.invoke('join', { channelId: this.id });
+        this.loading = false;
     }
 
     userList(users: userDetail[]) {
+        this.me(users);
         this.users = users;
     }
 
@@ -153,7 +165,7 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     userJoined(user: userDetail) {
-        let index = this.users.findIndex(i => i.ConnectionId === user.ConnectionId);
+        let index = this.users.findIndex(i => i.UserId === user.UserId);
 
         if(index == -1) {
             let me = this.users.findIndex(i => i.UserId === this.userId);

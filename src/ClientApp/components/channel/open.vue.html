@@ -3,14 +3,12 @@
     <div class="row">
         <div v-if="loading" class="loading">Loading&#8230;</div>
         <div class="col-md-10 main">
-            {{userId}}
             <div class="chat">
                 <ul>
 
                     <li v-for="item in chats" v-bind:class="{ 'receive' : item.User && item.User.UserId !== userId, 'send' : item.User && item.User.UserId === userId, 'notify' : !item.User }">
                         <div class="msg">
-                                <span v-if="item.User && item.User.UserId !== userId">{{item.User.Name}} : </span> 
-                              
+                                <span v-if="item.User && item.User.UserId !== userId">   {{item.User.Name}} : </span> 
                              {{item.Content}}
                         </div>
                     </li>
@@ -28,13 +26,15 @@
                 <p>Online Users</p>
 
                 <div v-for="item in users" class="dropdown user">
-                    {{item.Name}}
-                    <a  href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-option-vertical"></span></a>
-                    <ul class="dropdown-menu">
-                      <li><a href="#">Block</a></li>
-                      <li><a href="#">Kick</a></li>
-                      <li><a href="#">Authorize</a></li>
-                    </ul>
+                    <span v-if="item.ConnectionId" class="green">•</span> {{item.Name}}
+                    <template v-if="user && user.Authorized">
+                        <a  href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-option-vertical"></span></a>
+                        <ul class="dropdown-menu">
+                        <li><a href="#">Block</a></li>
+                        <li><a href="#">Kick</a></li>
+                        <li><a href="#">Authorize</a></li>
+                        </ul>
+                    </template>
                   </div>
 
             </div>

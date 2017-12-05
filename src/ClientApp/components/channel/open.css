@@ -118,3 +118,30 @@ container.scrollTop = container.scrollHeight;
     .user > a {
         float:right;
     }
+
+
+    .green{
+        color:green;
+        font-size:25px;
+        float:left;
+        line-height: 15px;
+        -webkit-animation: online-color 2s cubic-bezier(1,0,0,1) infinite;
+        animation:  online-color 2s cubic-bezier(1,0,0,1) infinite; 
+        margin-right: 5px;
+    }
+
+
+/* todo */
+@-webkit-keyframes online-color {
+    0% { color: rgb(0, 255, 64); }
+    33% { color: rgb(96, 255, 96); }  
+    67% { color: rgb(180, 255, 182); }
+    100% { color: rgb(188, 255, 182); }
+  }
+  
+  @keyframes online-color {
+    0% { color: rgb(0, 255, 64); }
+    33% { color: rgb(96, 255, 96); }  
+    67% { color: rgb(180, 255, 182); }
+    100% { color: rgb(188, 255, 182); }
+  }
