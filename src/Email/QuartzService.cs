@@ -17,8 +17,6 @@ namespace ChannelX.Email
             {
                 try
                 {
-                    Console.WriteLine("Creating the scheduler.");
-
                     NameValueCollection cfg = new NameValueCollection();
                     cfg.Add("quartz.scheduler.instanceName", "BulkEmail scheduler");
                     cfg.Add("quartz.jobStore.type", "Quartz.Simpl.RAMJobStore, Quartz");
@@ -46,12 +44,8 @@ namespace ChannelX.Email
                         )
                         .Build();
 
-                    Console.WriteLine(DateTime.Now);
-
                     // Tell quartz to schedule the job using our trigger
-                    Console.WriteLine("Starting the scheduler");
                     var test = await scheduler.ScheduleJob(fc, fct);
-                    Console.WriteLine("Scheduler started! {0}", test);
                 }
                 catch (SchedulerException se)
                 {

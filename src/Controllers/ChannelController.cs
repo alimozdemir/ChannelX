@@ -21,21 +21,14 @@ namespace ChannelX.Controllers
     public class ChannelController : Controller
     {
         readonly DatabaseContext _db;
-        readonly IEmailSender _emailSender;
-        public ChannelController(DatabaseContext db, IEmailSender emailSender)
+        public ChannelController(DatabaseContext db)
         {
             _db = db;
-            _emailSender = emailSender;
         }
 
         [HttpPost("[action]")]
         public async Task<IActionResult> Create([FromBody]CreateModel model)
         {
-
-            // SMTP TEST START
-            // await _emailSender.SendEmailAsync("itu.channelx@gmail.com", "subject", "Enter email body here");
-            // -----SMTP TEST END
-
             var result = new ResultModel();
 
             if (ModelState.IsValid) // if model is valid with data annotations
