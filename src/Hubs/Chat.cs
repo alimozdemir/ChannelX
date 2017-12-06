@@ -15,6 +15,7 @@ using ChannelX.Models.Trackers;
 // using Microsoft.Extensions.Caching.Redis;
 // using Microsoft.Extensions.Caching.Distributed;
 using ChannelX.Redis;
+using StackExchange.Redis;
 
 namespace ChannelX.Hubs
 {
@@ -41,6 +42,11 @@ namespace ChannelX.Hubs
         {
             var user = _tracker.Remove(Context.Connection);
             
+            // last seen is updated ondisconnectedasync
+            HashEntry entry = new HashEntry(user.UserId.ToString(), DateTime.Now.ToString());
+            HashEntry[] arr = new HashEntry[1];
+            arr[0] = entry;
+            _redis_db.HashSet("LastSeen" + user.GroupId.ToString(), arr);
             await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
             
             await base.OnDisconnectedAsync(exception);
@@ -129,7 +135,6 @@ namespace ChannelX.Hubs
         {
             var user = _tracker.Remove(Context.Connection);
             await Groups.RemoveAsync(Context.ConnectionId, user.GroupId);
-
             await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
         } 
 
