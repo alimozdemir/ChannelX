@@ -42,20 +42,23 @@ namespace ChannelX.Hubs
         {
             var user = _tracker.Remove(Context.Connection);
             
-            // last seen is updated ondisconnectedasync
-            HashEntry entry = new HashEntry(user.UserId.ToString(), DateTime.Now.ToString());
-            HashEntry[] arr = new HashEntry[1];
-            arr[0] = entry;
-            _redis_db.HashSet("LastSeen" + user.GroupId.ToString(), arr);
-            
-            #region Read Example from LastSeen
-            var data = _redis_db.HashGetAll("LastSeen" + user.GroupId.ToString());
-            foreach(var d in data)
+            if(_fact.IsConnected)
             {
-                System.Diagnostics.Debug.WriteLine(d.Name, d.Value);
+                // last seen is updated ondisconnectedasync
+                HashEntry entry = new HashEntry(user.UserId.ToString(), DateTime.Now.ToString());
+                HashEntry[] arr = new HashEntry[1];
+                arr[0] = entry;
+                _redis_db.HashSet("LastSeen" + user.GroupId.ToString(), arr);
+                
+                #region Read Example from LastSeen
+                var data = _redis_db.HashGetAll("LastSeen" + user.GroupId.ToString());
+                foreach(var d in data)
+                {
+                    System.Diagnostics.Debug.WriteLine(d.Name, d.Value);
+                }
+                #endregion
             }
-            #endregion
-
+            
             await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
             
             await base.OnDisconnectedAsync(exception);
