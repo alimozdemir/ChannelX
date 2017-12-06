@@ -23,6 +23,7 @@ const routes = [
             { path: '/', component: require('./components/home/home.vue.html') },
             { path: '/channel/create', component : require('./components/channel/create.vue.html') },
             { name: '/channel/open', path: '/channel/open/:id', component: require('./components/channel/open.vue.html'), props: true  },
+            { name: '/sh', path: '/sh/:hash', component: require('./components/channel/open.vue.html'), props: true  },
             { path: '/historypage', component : require('./components/historypage/historypage.vue.html') }
         ]
     },

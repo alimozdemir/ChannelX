@@ -13,7 +13,8 @@ interface getModel {
     id: number,
     title: string,
     endAt: Date,
-    createdAt: Date
+    createdAt: Date,
+    link: string
 }
 
 interface userDetail {
@@ -29,7 +30,7 @@ interface textModel {
     User: userDetail | undefined
 }
 
-const defaultGetModel: getModel = { id: 0, title: "", endAt: new Date(), createdAt: new Date() };
+const defaultGetModel: getModel = { id: 0, title: "", endAt: new Date(), createdAt: new Date(), link : "" };
 const chatAPI: string = "api/chat?token=";
 
 @Component({
@@ -53,8 +54,8 @@ export default class ChannelOpenComponent extends Vue {
 
     me(users: userDetail[]) {
         let index = users.findIndex(i => i.UserId === this.userId);
-        
-        if(index > -1)
+
+        if (index > -1)
             this.user = users[index];
         else
             this.user = null;
@@ -77,9 +78,22 @@ export default class ChannelOpenComponent extends Vue {
 
         this.connection = null;
         this.model = Object.assign({}, defaultGetModel); //shallow copy of the default values
-        this.id = parseInt(this.$route.params.id);
 
-        let get = await axios.post('/api/Channel/Get', { id: this.id })
+        let get;
+
+        if (this.$route.params.id) {
+            this.id = parseInt(this.$route.params.id);
+            get = await axios.post('/api/Channel/Get', { id: this.id })
+        }
+        else if (this.$route.params.hash) {
+            let hash = this.$route.params.hash;
+            get = await axios.post('/api/Channel/GetHash', { id: hash })
+        }
+        else {
+            swal({ text: "parameters is not valid", icon: 'error' });
+            this.loading = false;
+            return;
+        }
 
         if (get.status == 200) {
             let result = get.data as resultModel;
@@ -97,11 +111,10 @@ export default class ChannelOpenComponent extends Vue {
 
                 if (getPassword.status == 200) {
                     result = getPassword.data as resultModel;
-
                     if (result.succeeded) {
                         this.model = result.data as getModel;
+                        this.id = this.model.id;
                         this.getLogs()
-
                     }
                     else {
                         swal({ text: result.message, icon: 'error' });
@@ -109,6 +122,8 @@ export default class ChannelOpenComponent extends Vue {
                 }
             }
             else if (result.succeeded) {
+                this.model = result.data as getModel;
+                this.id = this.model.id;
                 this.getLogs()
             }
             else {
@@ -118,11 +133,11 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async mounted() {
-        
+
         this.loading = true;
         // due to file load order problem, 
         // we have to wait a little for loading axios settings.
-        setTimeout(async () => {await this.fetchData(); }, 200)
+        setTimeout(async () => { await this.fetchData(); }, 200)
 
     }
 
@@ -159,7 +174,7 @@ export default class ChannelOpenComponent extends Vue {
         let index = this.users.findIndex(i => i.ConnectionId == user.ConnectionId);
         if (index > -1) {
             let me = this.users.findIndex(i => i.UserId === this.userId);
-            let model: textModel = { Content: this.users[index].Name + ' is left the channel.', User : undefined };
+            let model: textModel = { Content: this.users[index].Name + ' is left the channel.', User: undefined };
             this.users.splice(index, 1);
             this.chats.push(model)
         }
@@ -168,10 +183,10 @@ export default class ChannelOpenComponent extends Vue {
     userJoined(user: userDetail) {
         let index = this.users.findIndex(i => i.UserId === user.UserId);
 
-        if(index == -1) {
+        if (index == -1) {
             let me = this.users.findIndex(i => i.UserId === this.userId);
 
-            let model: textModel = { Content: user.Name + ` is join the channel.`, User : undefined };
+            let model: textModel = { Content: user.Name + ` is join the channel.`, User: undefined };
             this.chats.push(model);
             this.users.push(user);
         }
@@ -193,10 +208,24 @@ export default class ChannelOpenComponent extends Vue {
         this.chats.push(msg);
     }
 
-    async showUser(id: string){
+    async showUser(id: string) {
         let popup = new UserComponent(id);
         this.loading = true;
         await popup.show();
         this.loading = false;
+    }
+
+    async getSharableLink(){
+        await swal(
+            {
+                title: this.model.title, 
+                icon: "info",
+                content: {
+                    element: 'input',
+                    attributes: {
+                        value: this.model.link
+                    }
+                }
+            });
     }
 }

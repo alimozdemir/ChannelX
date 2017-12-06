@@ -9,5 +9,6 @@ namespace ChannelX.Models.Channel
         public string Title { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime EndAt { get; set; }
+        public string Link { get; set; }
     }
 }
