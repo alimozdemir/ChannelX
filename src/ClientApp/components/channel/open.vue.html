@@ -3,6 +3,12 @@
     <div class="row">
         <div v-if="loading" class="loading">Loading&#8230;</div>
         <div class="col-md-10 main">
+            <div style="margin-top:-20px">
+                <h2 class="pull-left" style="margin-top:0px">{{model.title}}</h2>
+                <div class="pull-right">
+                    <a href="javascript:;" @click="getSharableLink" class="btn btn-success"> Sharable Link  </a>
+                </div>
+            </div>
             <div class="chat">
                 <ul>
 

@@ -9,6 +9,7 @@ using ChannelX.Models;
 using ChannelX.Models.Channel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -36,13 +37,14 @@ namespace ChannelX.Controllers
                 var userId = User.GetUserId();
 
                 Channel entity = new Channel();
-
+                
                 entity.CreatedAt = DateTime.Now;
                 entity.EndAt = entity.CreatedAt.AddHours(model.EndAtHours); // for now
                 entity.Title = model.Title;
                 entity.IsPrivate = model.IsPrivate;
                 entity.Password = model.Password;
                 entity.OwnerId = userId;
+                entity.Hash = Helper.ShortIdentifier();
 
                 _db.Channels.Add(entity);
 
@@ -52,12 +54,13 @@ namespace ChannelX.Controllers
                 {
                     result.Succeeded = true;
                     result.Message = "Channel is open.";
+                    result.Data = GetSharableLink(entity.Hash);
                 }
             }
 
             return Json(result);
         }
-
+        private string GetSharableLink(string hash) => $"{this.Request.Scheme}://{this.Request.Host}/sh/{hash}";
         [HttpGet("[action]")]
         public async Task<IActionResult> Public()
         {
@@ -96,7 +99,7 @@ namespace ChannelX.Controllers
 
         [NonAction]
         GetModel FillTheModel(Channel c) => new GetModel()
-        { Id = c.Id, Title = c.Title, CreatedAt = c.CreatedAt, EndAt = c.EndAt };
+        { Id = c.Id, Title = c.Title, CreatedAt = c.CreatedAt, EndAt = c.EndAt, Link = GetSharableLink(c.Hash) };
 
         [HttpPost("[action]")]
         public async Task<IActionResult> Get([FromBody]IdFormModel model)
@@ -145,6 +148,55 @@ namespace ChannelX.Controllers
 
             return Json(result);
         }
+
+        [HttpPost("[action]")]
+        public async Task<IActionResult> GetHash([FromBody]IdStringFormModel model)
+        {
+            var result = new ResultModel();
+
+            if (ModelState.IsValid)
+            {
+                var userId = User.GetUserId();
+
+                var data = await _db.Channels.Include(i => i.Users).FirstOrDefaultAsync(i => i.Hash == model.Id);
+                if (data != null)
+                {
+                    // if the user is owner or member of the channel, then let him in
+                    if (data.OwnerId == userId || data.Users.Any(i => i.UserId == userId))
+                    {
+                        result.Succeeded = true;
+                        result.Data = FillTheModel(data);
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(data.Password))
+                        {
+                            result.Prompt = true;
+                            result.Message = "Enter Password";
+                        }
+                        else
+                        {
+                            _db.ChannelUsers.Add(new ChannelUser()
+                            {
+                                UserId = userId,
+                                ChannelId = data.Id,
+                                State = (int)UserStates.Joined
+                            });
+
+                            var affected = await _db.SaveChangesAsync();
+                            if (affected == 1)
+                            {
+                                result.Data = FillTheModel(data);
+                                result.Succeeded = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return Json(result);
+        }
+
 
         [HttpPost("[action]")]
         public async Task<IActionResult> GetWithPassword([FromBody]PasswordFormModel model)
