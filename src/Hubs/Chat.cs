@@ -55,7 +55,7 @@ namespace ChannelX.Hubs
                 System.Diagnostics.Debug.WriteLine(d.Name, d.Value);
             }
             #endregion
-            
+
             await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
             
             await base.OnDisconnectedAsync(exception);
@@ -151,7 +151,7 @@ namespace ChannelX.Hubs
         {
             var user = await _tracker.Find(Context.ConnectionId);
             
-            TextModel message = new TextModel { Content = model.Content, User = user };
+            TextModel message = new TextModel { Content = model.Content, User = user, SentTime = DateTime.Now};
             // _cache.SetString("LastMessage", Convert.ToString(message.Content) );
             if(_fact.IsConnected)
             {

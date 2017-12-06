@@ -25,9 +25,10 @@ interface userDetail {
     Authorized: boolean
 }
 
-interface textModel {
+interface  textModel{
     Content: string,
-    User: userDetail | undefined
+    User: userDetail | undefined,
+    SentTime: Date
 }
 
 const defaultGetModel: getModel = { id: 0, title: "", endAt: new Date(), createdAt: new Date(), link : "" };
@@ -174,7 +175,7 @@ export default class ChannelOpenComponent extends Vue {
         let index = this.users.findIndex(i => i.ConnectionId == user.ConnectionId);
         if (index > -1) {
             let me = this.users.findIndex(i => i.UserId === this.userId);
-            let model: textModel = { Content: this.users[index].Name + ' is left the channel.', User: undefined };
+            let model: textModel = { Content: this.users[index].Name + ' is left the channel.', User: undefined, SentTime: new Date() };
             this.users.splice(index, 1);
             this.chats.push(model)
         }
@@ -186,7 +187,7 @@ export default class ChannelOpenComponent extends Vue {
         if (index == -1) {
             let me = this.users.findIndex(i => i.UserId === this.userId);
 
-            let model: textModel = { Content: user.Name + ` is join the channel.`, User: undefined };
+            let model: textModel = { Content: user.Name + ` is join the channel.`, User: undefined, SentTime: new Date() };
             this.chats.push(model);
             this.users.push(user);
         }
@@ -197,7 +198,7 @@ export default class ChannelOpenComponent extends Vue {
 
             let me = this.users.findIndex(i => i.UserId === this.userId);
 
-            let model: textModel = { Content: this.text, User: this.users[me] };
+            let model: textModel = { Content: this.text, User: this.users[me], SentTime: new Date() };
             this.connection.invoke('send', model)
 
             this.text = "";

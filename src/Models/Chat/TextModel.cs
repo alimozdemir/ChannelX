@@ -8,7 +8,8 @@ namespace ChannelX.Models.Chat
     {
         public string Content { get; set; }
         public UserDetail User { get; set; }
-
+        public DateTime SentTime {get; set;}
+        
         public override string ToString()
         {
                 return JsonConvert.SerializeObject(this);
