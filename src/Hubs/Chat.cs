@@ -43,11 +43,7 @@ namespace ChannelX.Hubs
             if (user != null)
             {
                 // last seen is updated ondisconnectedasync
-                HashEntry entry = new HashEntry(user.UserId.ToString(), DateTime.Now.ToString());
-                HashEntry[] arr = new HashEntry[1];
-                arr[0] = entry;
-                _redis_db.HashSet("LastSeen" + user.GroupId.ToString(), arr);
-
+                _redis_db.UpdateLastSeen(user);
                 #region Read Example from LastSeen
                 var data = _redis_db.HashGetAll("LastSeen" + user.GroupId.ToString());
                 foreach (var d in data)
@@ -152,11 +148,7 @@ namespace ChannelX.Hubs
             if (user != null)
             {
                 // last seen is updated ondisconnectedasync
-                HashEntry entry = new HashEntry(user.UserId.ToString(), DateTime.Now.ToString());
-                HashEntry[] arr = new HashEntry[1];
-                arr[0] = entry;
-                _redis_db.HashSet("LastSeen" + user.GroupId.ToString(), arr);
-
+                _redis_db.UpdateLastSeen(user);
                 await Groups.RemoveAsync(Context.ConnectionId, user.GroupId);
                 await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
             }
@@ -169,7 +161,7 @@ namespace ChannelX.Hubs
             TextModel message = new TextModel { Content = model.Content, User = user, SentTime = DateTime.Now };
             // _cache.SetString("LastMessage", Convert.ToString(message.Content) );
 
-            _redis_db.ListRightPush(user.GroupId.ToString(), message.ToString());
+            _redis_db.InsertMessage(user,message);
 
             System.Diagnostics.Debug.WriteLine(model.Content);
             await Clients.Group(user.GroupId).InvokeAsync("Receive", message);
