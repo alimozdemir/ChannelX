@@ -25,7 +25,7 @@ namespace ChannelX.Hubs
         readonly DatabaseContext _db;
         readonly UserTracker _tracker;
         // readonly IDistributedCache _cache;
-        readonly StackExchange.Redis.IDatabase _redis_db;
+        readonly RedisConnection _redis_db;
         readonly IRedisConnectionFactory _fact;
         // public Chat(DatabaseContext db, UserTracker tracker, IDistributedCache cache)
         public Chat(DatabaseContext db, UserTracker tracker, IRedisConnectionFactory fact)
@@ -33,31 +33,26 @@ namespace ChannelX.Hubs
             _db = db;
             _tracker = tracker;
             _fact = fact;
-            if(fact.IsConnected)
-            {
-                _redis_db = fact.Connection().GetDatabase();
-            }
+            _redis_db = _fact.Connection();
+            
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var user = _tracker.Remove(Context.Connection);
             
-            if(_fact.IsConnected)
+            // last seen is updated ondisconnectedasync
+            HashEntry entry = new HashEntry(user.UserId.ToString(), DateTime.Now.ToString());
+            HashEntry[] arr = new HashEntry[1];
+            arr[0] = entry;
+            _redis_db.HashSet("LastSeen" + user.GroupId.ToString(), arr);
+            
+            #region Read Example from LastSeen
+            var data = _redis_db.HashGetAll("LastSeen" + user.GroupId.ToString());
+            foreach(var d in data)
             {
-                // last seen is updated ondisconnectedasync
-                HashEntry entry = new HashEntry(user.UserId.ToString(), DateTime.Now.ToString());
-                HashEntry[] arr = new HashEntry[1];
-                arr[0] = entry;
-                _redis_db.HashSet("LastSeen" + user.GroupId.ToString(), arr);
-                
-                #region Read Example from LastSeen
-                var data = _redis_db.HashGetAll("LastSeen" + user.GroupId.ToString());
-                foreach(var d in data)
-                {
-                    System.Diagnostics.Debug.WriteLine(d.Name, d.Value);
-                }
-                #endregion
+                System.Diagnostics.Debug.WriteLine(d.Name, d.Value);
             }
+            #endregion
             
             await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
             
@@ -122,23 +117,21 @@ namespace ChannelX.Hubs
                 await Clients.Group(model.ChannelId.ToString()).InvokeAsync("UserJoined", userDetail);
 
                 System.Diagnostics.Debug.WriteLine("Joining");
-                if(_fact.IsConnected)
+               
+                System.Diagnostics.Debug.WriteLine(Context.ConnectionId);
+                var currentUser = await _tracker.Find(Context.ConnectionId);
+
+                var messages = _redis_db.ListRange(userDetail.GroupId.ToString(),0,-1);
+                foreach(var message in messages)
                 {
-                    System.Diagnostics.Debug.WriteLine(Context.ConnectionId);
-                    // *** ALIM
-                    var currentUser = await _tracker.Find(Context.ConnectionId);
+                    TextModel text = JsonConvert.DeserializeObject<TextModel>(message);
 
-                    var messages = _redis_db.ListRange(userDetail.GroupId.ToString(),0,-1);
-                    foreach(var message in messages)
-                    {
-                        TextModel text = JsonConvert.DeserializeObject<TextModel>(message);
-
-                        System.Diagnostics.Debug.WriteLine("Message:");
-                        System.Diagnostics.Debug.WriteLine(message);
-                        // Burada değişmesi gereken, kullanıcı bilgilerinin redisden gelmesi 
-                        System.Diagnostics.Debug.WriteLine(text.Content);
-                        await Clients.Client(Context.ConnectionId).InvokeAsync("Receive", text);
-                    }
+                    System.Diagnostics.Debug.WriteLine("Message:");
+                    System.Diagnostics.Debug.WriteLine(message);
+                    // Burada değişmesi gereken, kullanıcı bilgilerinin redisden gelmesi 
+                    System.Diagnostics.Debug.WriteLine(text.Content);
+                    await Clients.Client(Context.ConnectionId).InvokeAsync("Receive", text);
+                
                 }
             }
         }
@@ -156,11 +149,9 @@ namespace ChannelX.Hubs
             
             TextModel message = new TextModel { Content = model.Content, User = user, SentTime = DateTime.Now};
             // _cache.SetString("LastMessage", Convert.ToString(message.Content) );
-            if(_fact.IsConnected)
-            {
-                _redis_db.StringSet("LastMessage", message.ToString());
-                _redis_db.ListRightPush(user.GroupId.ToString(),message.ToString());
-            }
+            
+            _redis_db.ListRightPush(user.GroupId.ToString(),message.ToString());
+            
             System.Diagnostics.Debug.WriteLine(model.Content);
             await Clients.Group(user.GroupId).InvokeAsync("Receive", message);
         }

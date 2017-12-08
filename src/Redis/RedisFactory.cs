@@ -9,34 +9,21 @@ namespace ChannelX.Redis
 { 
     public interface IRedisConnectionFactory
     {
-        ConnectionMultiplexer Connection();
-        bool IsConnected {get;}
+        RedisConnection Connection();
+      
     }
 
     public class RedisConnectionFactory : IRedisConnectionFactory
     {
-        /// <summary>
-        ///     The _connection.
-        /// </summary>
-        private readonly ConnectionMultiplexer _connection;
-        public bool IsConnected{get;}
-
+        RedisConnection _connection_wrapper;
         public RedisConnectionFactory()
         {
-            try{
-                this._connection = ConnectionMultiplexer.Connect("localhost:6379"); // change connection String
-                IsConnected = true;
-            }
-            catch{
-                // will handle in the future
-                IsConnected = false;
-            }
-            
+            _connection_wrapper = new RedisConnection();
         }
 
-        public ConnectionMultiplexer Connection()
+        public RedisConnection Connection()
         {
-            return this._connection;
+            return this._connection_wrapper;
         }
     }
 
