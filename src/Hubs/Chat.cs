@@ -34,28 +34,31 @@ namespace ChannelX.Hubs
             _tracker = tracker;
             _fact = fact;
             _redis_db = _fact.Connection();
-            
+
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var user = _tracker.Remove(Context.Connection);
-            
-            // last seen is updated ondisconnectedasync
-            HashEntry entry = new HashEntry(user.UserId.ToString(), DateTime.Now.ToString());
-            HashEntry[] arr = new HashEntry[1];
-            arr[0] = entry;
-            _redis_db.HashSet("LastSeen" + user.GroupId.ToString(), arr);
-            
-            #region Read Example from LastSeen
-            var data = _redis_db.HashGetAll("LastSeen" + user.GroupId.ToString());
-            foreach(var d in data)
+            // when the leave function does not work
+            if (user != null)
             {
-                System.Diagnostics.Debug.WriteLine(d.Name, d.Value);
+                // last seen is updated ondisconnectedasync
+                HashEntry entry = new HashEntry(user.UserId.ToString(), DateTime.Now.ToString());
+                HashEntry[] arr = new HashEntry[1];
+                arr[0] = entry;
+                _redis_db.HashSet("LastSeen" + user.GroupId.ToString(), arr);
+
+                #region Read Example from LastSeen
+                var data = _redis_db.HashGetAll("LastSeen" + user.GroupId.ToString());
+                foreach (var d in data)
+                {
+                    System.Diagnostics.Debug.WriteLine(d.Name, d.Value);
+                }
+                #endregion
+
+                await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
             }
-            #endregion
-            
-            await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
-            
+
             await base.OnDisconnectedAsync(exception);
         }
 
@@ -69,17 +72,15 @@ namespace ChannelX.Hubs
             var userId = Context.User.GetUserId();
             var user = await _db.Users.FindAsync(userId);
             var channel = await _db.Channels.FindAsync(model.ChannelId);
-            var engagedUsers = await _db.ChannelUsers.Include(i => i.User)
-                                .Where(i => i.ChannelId.Equals(model.ChannelId)).ToListAsync();
 
-            var userEngage = engagedUsers.FirstOrDefault(i => i.ChannelId.Equals(model.ChannelId) && i.UserId.Equals(userId));
-            if(user != null && channel != null)
+            var userEngage = await _db.ChannelUsers.FirstOrDefaultAsync(i => i.ChannelId.Equals(model.ChannelId) && i.UserId.Equals(userId));
+            if (user != null && channel != null)
             {
-                if(!userId.Equals(channel.OwnerId))
+                if (!userId.Equals(channel.OwnerId))
                 {
                     if (userEngage != null)
                     {
-                        if (userEngage.State == (int)UserStates.Blocked || userEngage.State == (int)UserStates.Kicked)
+                        if (userEngage.State == (int)UserStates.Blocked)
                         {
                             await Clients.Client(Context.ConnectionId).InvokeAsync("Disconnect");
                             return;
@@ -93,36 +94,24 @@ namespace ChannelX.Hubs
 
                 await Groups.AddAsync(Context.ConnectionId, model.ChannelId.ToString());
 
-                var userDetail = new UserDetail(Context.ConnectionId, user.UserName, model.ChannelId.ToString(), 
-                                        channel.OwnerId == userId, userId);
+                var userDetail = new UserDetail(Context.ConnectionId, user.UserName, model.ChannelId.ToString(),
+                                        channel.OwnerId == userId ? true : userEngage.State == (int)UserStates.Authorize, userId,
+                                        channel.OwnerId == userId ? (int)UserStates.Authorize : userEngage.State);
 
                 _tracker.Add(Context.Connection, userDetail);
-                
-                // online users
-                var users = (await _tracker.All(userDetail.GroupId)).ToList();
 
-                // all users that engaged with this channel
-                foreach(var item in engagedUsers){
-                    if (!users.Any(i => i.UserId.Equals(item.UserId))) 
-                    {
-                        users.Add(new UserDetail(string.Empty, 
-                                item.User.UserName, 
-                                model.ChannelId.ToString(), 
-                                item.State == (int)UserStates.Authorize, item.UserId) );
-                    }
-                }
 
-                await Clients.Client(Context.ConnectionId).InvokeAsync("UserList", users);
-                
+                await UserList(model.ChannelId);
+
                 await Clients.Group(model.ChannelId.ToString()).InvokeAsync("UserJoined", userDetail);
 
                 System.Diagnostics.Debug.WriteLine("Joining");
-               
+
                 System.Diagnostics.Debug.WriteLine(Context.ConnectionId);
                 var currentUser = await _tracker.Find(Context.ConnectionId);
 
-                var messages = _redis_db.ListRange(userDetail.GroupId.ToString(),0,-1);
-                foreach(var message in messages)
+                var messages = _redis_db.ListRange(userDetail.GroupId.ToString(), 0, -1);
+                foreach (var message in messages)
                 {
                     TextModel text = JsonConvert.DeserializeObject<TextModel>(message);
 
@@ -131,61 +120,148 @@ namespace ChannelX.Hubs
                     // Burada değişmesi gereken, kullanıcı bilgilerinin redisden gelmesi 
                     System.Diagnostics.Debug.WriteLine(text.Content);
                     await Clients.Client(Context.ConnectionId).InvokeAsync("Receive", text);
-                
+
                 }
             }
         }
-        
+        private async Task UserList(int groupId)
+        {
+            var engagedUsers = await _db.ChannelUsers.Include(i => i.User)
+                            .Where(i => i.ChannelId.Equals(groupId)).ToListAsync();
+            // online users
+            var users = (await _tracker.All(groupId.ToString())).ToList();
+
+            // all users that engaged with this channel
+            foreach (var item in engagedUsers)
+            {
+                if (!users.Any(i => i.UserId.Equals(item.UserId)))
+                {
+                    users.Add(new UserDetail(string.Empty,
+                            item.User.UserName,
+                            groupId.ToString(),
+                            item.State == (int)UserStates.Authorize, item.UserId,
+                            item.State));
+                }
+            }
+
+            await Clients.Client(Context.ConnectionId).InvokeAsync("UserList", users);
+        }
         public async Task Leave()
         {
             var user = _tracker.Remove(Context.Connection);
-            await Groups.RemoveAsync(Context.ConnectionId, user.GroupId);
-            await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
-        } 
+            if (user != null)
+            {
+                // last seen is updated ondisconnectedasync
+                HashEntry entry = new HashEntry(user.UserId.ToString(), DateTime.Now.ToString());
+                HashEntry[] arr = new HashEntry[1];
+                arr[0] = entry;
+                _redis_db.HashSet("LastSeen" + user.GroupId.ToString(), arr);
+
+                await Groups.RemoveAsync(Context.ConnectionId, user.GroupId);
+                await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
+            }
+        }
 
         public async Task Send(TextModel model)
         {
             var user = await _tracker.Find(Context.ConnectionId);
-            
-            TextModel message = new TextModel { Content = model.Content, User = user, SentTime = DateTime.Now};
+
+            TextModel message = new TextModel { Content = model.Content, User = user, SentTime = DateTime.Now };
             // _cache.SetString("LastMessage", Convert.ToString(message.Content) );
-            
-            _redis_db.ListRightPush(user.GroupId.ToString(),message.ToString());
-            
+
+            _redis_db.ListRightPush(user.GroupId.ToString(), message.ToString());
+
             System.Diagnostics.Debug.WriteLine(model.Content);
             await Clients.Group(user.GroupId).InvokeAsync("Receive", message);
         }
         public async Task Kick(UserDetail target)
         {
             int id = 0;
-            if(int.TryParse(target.GroupId, out id))
+            if (int.TryParse(target.GroupId, out id))
             {
-                var user = await _tracker.Find(Context.ConnectionId);
                 var channel = await _db.Channels.Include(i => i.Users).FirstOrDefaultAsync(i => i.Id == id);
                 var verifyTarget = await _tracker.Find(target.ConnectionId);
-                
-                if(verifyTarget.Equals(target))
+
+                if (verifyTarget.Equals(target)) // user should be online
                 {
-                    if ( channel.OwnerId != target.UserId )
+                    if (channel.OwnerId != target.UserId)
                     {
-                        var channelUserDb = await _db.ChannelUsers.FirstOrDefaultAsync(i => i.ChannelId == id && i.UserId.Equals(target.UserId));
-
-                        channelUserDb.State = (int)UserStates.Kicked;
-
-                        await _db.SaveChangesAsync();
-
-                        await Clients.Client(Context.ConnectionId).InvokeAsync("Disconnect");
+                        await Clients.Client(target.ConnectionId).InvokeAsync("Disconnect");
                     }
                 }
             }
         }
-        public async Task Block(UserDetail user)
+        public async Task Block(UserDetail target)
         {
+            int id = 0;
+            if (int.TryParse(target.GroupId, out id))
+            {
+                var user = await _tracker.Find(Context.ConnectionId);
+                var channel = await _db.Channels.Include(i => i.Users).FirstOrDefaultAsync(i => i.Id == id);
+                if (channel.OwnerId != target.UserId)
+                {
+                    var channelUserDb = await _db.ChannelUsers.FirstOrDefaultAsync(i => i.ChannelId == id && i.UserId.Equals(target.UserId));
 
+                    channelUserDb.State = (int)UserStates.Blocked;
+                    target.State = channelUserDb.State;
+
+                    await _db.SaveChangesAsync();
+
+                    // if user is online, disconnect him/her.
+                    if (!string.IsNullOrEmpty(target.ConnectionId))
+                    {
+                        await Clients.Client(target.ConnectionId).InvokeAsync("Disconnect");
+                    }
+
+                    await UpdateState(target);
+                }
+            }
         }
-        public async Task Authorize(UserDetail user)
-        {
 
+        public async Task Authorize(UserDetail target)
+        {
+            int id = 0;
+            if (int.TryParse(target.GroupId, out id))
+            {
+                var channel = await _db.Channels.Include(i => i.Users).FirstOrDefaultAsync(i => i.Id == id);
+                if (channel.OwnerId != target.UserId)
+                {
+                    var channelUserDb = await _db.ChannelUsers.FirstOrDefaultAsync(i => i.ChannelId == id && i.UserId.Equals(target.UserId));
+
+                    channelUserDb.State = (int)UserStates.Authorize;
+                    target.State = channelUserDb.State;
+
+                    await _db.SaveChangesAsync();
+
+                    await UpdateState(target);
+                }
+            }
+        }
+
+        public async Task ResetUser(UserDetail target)
+        {
+            int id = 0;
+            if (int.TryParse(target.GroupId, out id))
+            {
+                var channel = await _db.Channels.Include(i => i.Users).FirstOrDefaultAsync(i => i.Id == id);
+
+                if (channel.OwnerId != target.UserId)
+                {
+                    var channelUserDb = await _db.ChannelUsers.FirstOrDefaultAsync(i => i.ChannelId == id && i.UserId.Equals(target.UserId));
+
+                    channelUserDb.State = (int)UserStates.Joined;
+                    target.State = channelUserDb.State;
+                    await _db.SaveChangesAsync();
+
+                    await UpdateState(target);
+
+                }
+            }
+        }
+
+        private async Task UpdateState(UserDetail user)
+        {
+            await Clients.Group(user.GroupId).InvokeAsync("UpdateState", user);
         }
     }
 }

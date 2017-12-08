@@ -32,14 +32,21 @@
                 <p>Online Users</p>
 
                 <div v-for="item in users" class="dropdown user">
-                    <span v-if="item.ConnectionId" class="green">•</span> {{item.Name}}
-                    <template v-if="user && user.Authorized">
+                    <span v-if="item.ConnectionId" class="green">•</span> 
+                    <span v-if="isBlocked(item.State)">Blocked</span>
+                    <span v-bind:class="{ 'owner': model.ownerId === item.UserId }">{{item.Name}}</span>
+                    <template v-if="user && user.Authorized && model.ownerId !== item.UserId">
                         <a  href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-option-vertical"></span></a>
                         <ul class="dropdown-menu">
-                        <li><a href="#">Block</a></li>
-                        <li><a href="#">Kick</a></li>
-                        <li><a href="#">Authorize</a></li>
-                        <li><a href="javascript:;" @click="showUser(item.UserId)">Profile</a></li>
+                            <li><a href="javascript:;" @click="showUser(item.UserId)">Profile</a></li>
+                            <li class="divider"></li>
+                            <li v-if="item.ConnectionId"><a href="javascript:;" @click="kick(item)">Kick</a></li>
+                            <li v-if="item.ConnectionId" class="divider"></li>
+                            <li v-if="!isBlocked(item.State)"><a href="javascript:;" @click="block(item)">Block</a></li>
+                            <li v-else><a href="javascript:;" @click="resetUser(item)">Unblock</a></li>
+                            <li v-if="!isAuthorize(item.State)"><a href="javascript:;" @click="auth(item)">Authorize</a></li>
+                            <li v-else><a href="javascript:;" @click="resetUser(item)">Unauthorize</a></li>
+
                         </ul>
                     </template>
                   </div>

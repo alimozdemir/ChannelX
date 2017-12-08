@@ -129,6 +129,11 @@ container.scrollTop = container.scrollHeight;
         animation:  online-color 2s cubic-bezier(1,0,0,1) infinite; 
         margin-right: 5px;
     }
+    .owner
+    {
+        font-weight: bold;
+        text-decoration: underline;
+    }
 
 
 /* todo */

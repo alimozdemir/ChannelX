@@ -37,7 +37,7 @@ namespace ChannelX.Controllers
                 var userId = User.GetUserId();
 
                 Channel entity = new Channel();
-                
+
                 entity.CreatedAt = DateTime.Now;
                 entity.EndAt = entity.CreatedAt.AddHours(model.EndAtHours); // for now
                 entity.Title = model.Title;
@@ -99,7 +99,15 @@ namespace ChannelX.Controllers
 
         [NonAction]
         GetModel FillTheModel(Channel c) => new GetModel()
-        { Id = c.Id, Title = c.Title, CreatedAt = c.CreatedAt, EndAt = c.EndAt, Link = GetSharableLink(c.Hash) };
+        {
+            Id = c.Id,
+            Title = c.Title,
+            CreatedAt = c.CreatedAt,
+            EndAt = c.EndAt,
+            Link = GetSharableLink(c.Hash),
+            OwnerId = c.OwnerId,
+            CurrentUserId = User.GetUserId()
+        };
 
         [HttpPost("[action]")]
         public async Task<IActionResult> Get([FromBody]IdFormModel model)
@@ -116,8 +124,17 @@ namespace ChannelX.Controllers
                     // if the user is owner or member of the channel, then let him in
                     if (data.OwnerId == userId || data.Users.Any(i => i.UserId == userId))
                     {
-                        result.Succeeded = true;
-                        result.Data = FillTheModel(data);
+                        var user = data.Users.FirstOrDefault(i => i.UserId.Equals(userId));
+                        if (user != null && user.State == (int)UserStates.Blocked)
+                        {
+                            result.Succeeded = false;
+                            result.Message = "You have blocked from this channel.";
+                        }
+                        else
+                        {
+                            result.Succeeded = true;
+                            result.Data = FillTheModel(data);
+                        }
                     }
                     else
                     {
@@ -149,6 +166,7 @@ namespace ChannelX.Controllers
             return Json(result);
         }
 
+        // there should be a common function for get functions
         [HttpPost("[action]")]
         public async Task<IActionResult> GetHash([FromBody]IdStringFormModel model)
         {
@@ -233,6 +251,7 @@ namespace ChannelX.Controllers
 
             return Json(result);
         }
+
         [HttpGet("[action]")]
         public async Task<IActionResult> HistoryPage()
         {

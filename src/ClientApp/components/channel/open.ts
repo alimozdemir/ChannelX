@@ -5,7 +5,7 @@ import signalR, { HubConnection } from '@aspnet/signalr-client';
 import axios from 'axios';
 import resultModel from '../../models/resultModel';
 import swal from 'sweetalert';
-import { UserStore } from '../../stores/userState'
+import { UserStore, UserState } from '../../stores/userState'
 import UserComponent from "../user/user";
 import './open.css';
 
@@ -14,7 +14,9 @@ interface getModel {
     title: string,
     endAt: Date,
     createdAt: Date,
-    link: string
+    link: string,
+    ownerId: string,
+    currentUserId: string
 }
 
 interface userDetail {
@@ -22,16 +24,23 @@ interface userDetail {
     ConnectionId: string,
     Name: string,
     GroupId: string,
-    Authorized: boolean
+    Authorized: boolean,
+    State: UserStates
 }
 
-interface  textModel{
+interface textModel {
     Content: string,
     User: userDetail | undefined,
     SentTime: Date
 }
 
-const defaultGetModel: getModel = { id: 0, title: "", endAt: new Date(), createdAt: new Date(), link : "" };
+enum UserStates {
+    Joined,
+    Blocked,
+    Authorize
+}
+
+const defaultGetModel: getModel = { id: 0, title: "", endAt: new Date(), createdAt: new Date(), link: "", ownerId: "", currentUserId: "" };
 const chatAPI: string = "api/chat?token=";
 
 @Component({
@@ -52,6 +61,8 @@ export default class ChannelOpenComponent extends Vue {
     users: userDetail[] = [];
     userId: string = "";
     user: userDetail | null = null;
+    // signalr should have a status value for connection status.
+    disconnected: boolean = false;
 
     me(users: userDetail[]) {
         let index = users.findIndex(i => i.UserId === this.userId);
@@ -63,15 +74,13 @@ export default class ChannelOpenComponent extends Vue {
 
         console.log(this.user, index, this.userId, users)
     }
+
     toBottom() {
-
         let chat = document.getElementsByClassName('chat')[0];
-
         chat.scrollTop = chat.scrollHeight;
     }
 
     async fetchData() {
-        console.log(this.userId);
         if (this.connection !== null) {
             this.connection.invoke('leave');
             this.connection.stop();
@@ -91,8 +100,9 @@ export default class ChannelOpenComponent extends Vue {
             get = await axios.post('/api/Channel/GetHash', { id: hash })
         }
         else {
-            swal({ text: "parameters is not valid", icon: 'error' });
+            swal({ text: "Parameters is not valid", icon: 'error' });
             this.loading = false;
+            this.$router.push('/')
             return;
         }
 
@@ -115,6 +125,7 @@ export default class ChannelOpenComponent extends Vue {
                     if (result.succeeded) {
                         this.model = result.data as getModel;
                         this.id = this.model.id;
+                        this.userId = this.model.currentUserId;
                         this.getLogs()
                     }
                     else {
@@ -125,11 +136,23 @@ export default class ChannelOpenComponent extends Vue {
             else if (result.succeeded) {
                 this.model = result.data as getModel;
                 this.id = this.model.id;
+                this.userId = this.model.currentUserId;
                 this.getLogs()
             }
             else {
-                swal({ text: result.message, icon: 'error' });
+                await swal({ text: result.message, icon: 'error' });
+
+                this.$router.push('/')
             }
+        }
+        else {
+            this.loading = false;
+            await swal({
+                text: "Error",
+                icon: 'error'
+            })
+
+            this.$router.push('/');
         }
     }
 
@@ -139,21 +162,23 @@ export default class ChannelOpenComponent extends Vue {
         // due to file load order problem, 
         // we have to wait a little for loading axios settings.
         setTimeout(async () => { await this.fetchData(); }, 200)
-
     }
 
     async destroyed() {
 
-        if (this.connection !== null) {
+        if (this.connection !== null && !this.disconnected) {
             await this.connection.invoke('leave');
             this.connection.stop();
         }
     }
 
     async getLogs() {
-        this.userId = await UserStore.readUserId(this.$store);
+
+        if (this.userId === undefined || this.userId === "")
+            this.userId = await UserStore.readUserId(this.$store);
+
         let url = chatAPI + UserStore.readAuthKey(this.$store);
-        console.log(url)
+
         this.connection = new HubConnection(url, {});
 
         await this.connection.start();
@@ -161,14 +186,31 @@ export default class ChannelOpenComponent extends Vue {
         this.connection.on('userLeft', this.userLeft);
         this.connection.on('userJoined', this.userJoined)
         this.connection.on('receive', this.receive)
-
+        this.connection.on('disconnect', this.disconnect)
+        this.connection.on('updateState', this.updateState)
         this.connection.invoke('join', { channelId: this.id });
-        this.loading = false;
     }
+    async disconnect() {
+        console.log("disconnect...");
+        if (this.connection) {
+            this.disconnected = true;
+            await this.connection.invoke('leave');
+            this.connection.stop();
+            await swal({
+                text: "You have been disconnected from channel.",
+                icon: 'error'
+            });
 
+            this.$router.push('/')
+
+        }
+    }
     userList(users: userDetail[]) {
         this.me(users);
         this.users = users;
+        this.loading = false;
+        console.log("NEW USER LIST")
+
     }
 
     userLeft(user: userDetail) {
@@ -182,6 +224,7 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     userJoined(user: userDetail) {
+        console.log("User Joined", user);
         let index = this.users.findIndex(i => i.UserId === user.UserId);
 
         if (index == -1) {
@@ -190,7 +233,12 @@ export default class ChannelOpenComponent extends Vue {
             let model: textModel = { Content: user.Name + ` is join the channel.`, User: undefined, SentTime: new Date() };
             this.chats.push(model);
             this.users.push(user);
+            let a: number;
+            a = 0;
+            var d = a == UserStates.Blocked;
         }
+
+        this.$forceUpdate();
     }
 
     send() {
@@ -216,10 +264,10 @@ export default class ChannelOpenComponent extends Vue {
         this.loading = false;
     }
 
-    async getSharableLink(){
+    async getSharableLink() {
         await swal(
             {
-                title: this.model.title, 
+                title: this.model.title,
                 icon: "info",
                 content: {
                     element: 'input',
@@ -229,4 +277,39 @@ export default class ChannelOpenComponent extends Vue {
                 }
             });
     }
+
+    block(user: userDetail) {
+        if (this.connection != null) {
+            this.connection.send("block", user);
+        }
+    }
+
+    kick(user: userDetail) {
+        if (this.connection != null) {
+            console.log("Kicking the user..");
+            this.connection.send("kick", user);
+        }
+    }
+    auth(user: userDetail) {
+        if (this.connection != null) {
+            this.connection.send("authorize", user);
+        }
+    }
+    resetUser(user: userDetail) {
+        if (this.connection != null) {
+            this.connection.send("resetUser", user);
+        }
+    }
+
+    updateState(user: userDetail)
+    {
+        console.log("updateState");
+        this.users.forEach(element => {
+            if(element.UserId == user.UserId)
+                element.State = user.State;
+        });
+    }
+
+    isBlocked(val: UserStates) { return val === UserStates.Blocked; }
+    isAuthorize(val: UserStates) { return val === UserStates.Authorize; }
 }

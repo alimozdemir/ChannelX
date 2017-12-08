@@ -14,7 +14,6 @@ namespace ChannelX.Data
     public enum UserStates
     {
         Joined,
-        Kicked,
         Blocked,
         Authorize
     }

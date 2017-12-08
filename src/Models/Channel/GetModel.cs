@@ -10,5 +10,7 @@ namespace ChannelX.Models.Channel
         public DateTime CreatedAt { get; set; }
         public DateTime EndAt { get; set; }
         public string Link { get; set; }
+        public string OwnerId { get; set; }
+        public string CurrentUserId { get; set; }
     }
 }
