@@ -35,11 +35,12 @@
                     <span v-if="item.ConnectionId" class="green">•</span> 
                     <span v-if="isBlocked(item.State)">Blocked</span>
                     <span v-bind:class="{ 'owner': model.ownerId === item.UserId }">{{item.Name}}</span>
-                    <template v-if="user && user.Authorized && model.ownerId !== item.UserId">
+                    <template v-if="user && isAuthorize(user.State) && model.ownerId !== item.UserId && item.UserId != userId">
                         <a  href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-option-vertical"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="javascript:;" @click="showUser(item.UserId)">Profile</a></li>
                             <li class="divider"></li>
+
                             <li v-if="item.ConnectionId"><a href="javascript:;" @click="kick(item)">Kick</a></li>
                             <li v-if="item.ConnectionId" class="divider"></li>
                             <li v-if="!isBlocked(item.State)"><a href="javascript:;" @click="block(item)">Block</a></li>

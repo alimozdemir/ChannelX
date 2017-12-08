@@ -52,6 +52,7 @@ namespace ChannelX.Hubs
                 }
                 #endregion
 
+                user.ConnectionId = "";
                 await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
             }
 
@@ -67,7 +68,10 @@ namespace ChannelX.Hubs
         {
             var userId = Context.User.GetUserId();
             var user = await _db.Users.FindAsync(userId);
-            var channel = await _db.Channels.FindAsync(model.ChannelId);
+            var channel = await _db.Channels.Include(i => i.Owner)
+                                            .Include(i => i.Users)
+                                            .ThenInclude(i => i.User)
+                                            .FirstOrDefaultAsync(i => i.Id == model.ChannelId);
 
             var userEngage = await _db.ChannelUsers.FirstOrDefaultAsync(i => i.ChannelId.Equals(model.ChannelId) && i.UserId.Equals(userId));
             if (user != null && channel != null)
@@ -90,58 +94,60 @@ namespace ChannelX.Hubs
 
                 await Groups.AddAsync(Context.ConnectionId, model.ChannelId.ToString());
 
-                var userDetail = new UserDetail(Context.ConnectionId, user.UserName, model.ChannelId.ToString(),
-                                        channel.OwnerId == userId ? true : userEngage.State == (int)UserStates.Authorize, userId,
+                var userDetail = new UserDetail(Context.ConnectionId, user.UserName, model.ChannelId.ToString(), userId,
                                         channel.OwnerId == userId ? (int)UserStates.Authorize : userEngage.State);
 
                 _tracker.Add(Context.Connection, userDetail);
+                #region User List
+                // load user list
+                var engagedUsers = channel.Users
+                    .Where(i => i.ChannelId.Equals(model.ChannelId))
+                    .Select(i => new UserDetail(string.Empty,
+                        i.User.UserName,
+                        model.ChannelId.ToString(),
+                        i.UserId,
+                        i.State)
+                    )
+                    .ToList();
 
+                // add the owner
+                engagedUsers.Add(new UserDetail(string.Empty, channel.Owner.UserName, model.ChannelId.ToString(),
+                                        channel.OwnerId,
+                                        (int)UserStates.Authorize));
 
-                await UserList(model.ChannelId);
+                // online users
+                var users = (await _tracker.All(model.ChannelId.ToString())).ToList();
 
+                // if users online take the connection ids
+                foreach (var item in users)
+                {
+                    var temp = engagedUsers.FirstOrDefault(i => i.UserId.Equals(item.UserId));
+                    if (temp != null)
+                    {
+                        temp.ConnectionId = item.ConnectionId;
+                    }
+                }
+
+                // send user
+                await Clients.Client(Context.ConnectionId).InvokeAsync("UserList", engagedUsers);
+                #endregion
+                // broadcast the user join
                 await Clients.Group(model.ChannelId.ToString()).InvokeAsync("UserJoined", userDetail);
 
-                System.Diagnostics.Debug.WriteLine("Joining");
 
-                System.Diagnostics.Debug.WriteLine(Context.ConnectionId);
+                #region Load messages
                 var currentUser = await _tracker.Find(Context.ConnectionId);
-
                 var messages = _redis_db.ListRange(userDetail.GroupId.ToString(), 0, -1);
                 foreach (var message in messages)
                 {
                     TextModel text = JsonConvert.DeserializeObject<TextModel>(message);
 
-                    System.Diagnostics.Debug.WriteLine("Message:");
-                    System.Diagnostics.Debug.WriteLine(message);
-                    // Burada değişmesi gereken, kullanıcı bilgilerinin redisden gelmesi 
-                    System.Diagnostics.Debug.WriteLine(text.Content);
                     await Clients.Client(Context.ConnectionId).InvokeAsync("Receive", text);
-
                 }
+                #endregion
             }
         }
-        private async Task UserList(int groupId)
-        {
-            var engagedUsers = await _db.ChannelUsers.Include(i => i.User)
-                            .Where(i => i.ChannelId.Equals(groupId)).ToListAsync();
-            // online users
-            var users = (await _tracker.All(groupId.ToString())).ToList();
 
-            // all users that engaged with this channel
-            foreach (var item in engagedUsers)
-            {
-                if (!users.Any(i => i.UserId.Equals(item.UserId)))
-                {
-                    users.Add(new UserDetail(string.Empty,
-                            item.User.UserName,
-                            groupId.ToString(),
-                            item.State == (int)UserStates.Authorize, item.UserId,
-                            item.State));
-                }
-            }
-
-            await Clients.Client(Context.ConnectionId).InvokeAsync("UserList", users);
-        }
         public async Task Leave()
         {
             var user = _tracker.Remove(Context.Connection);
@@ -150,6 +156,7 @@ namespace ChannelX.Hubs
                 // last seen is updated ondisconnectedasync
                 _redis_db.UpdateLastSeen(user);
                 await Groups.RemoveAsync(Context.ConnectionId, user.GroupId);
+                user.ConnectionId = "";
                 await Clients.Group(user.GroupId).InvokeAsync("UserLeft", user);
             }
         }
@@ -158,13 +165,16 @@ namespace ChannelX.Hubs
         {
             var user = await _tracker.Find(Context.ConnectionId);
 
-            TextModel message = new TextModel { Content = model.Content, User = user, SentTime = DateTime.Now };
-            // _cache.SetString("LastMessage", Convert.ToString(message.Content) );
+            if (user != null)
+            {
+                TextModel message = new TextModel { Content = model.Content, User = user, SentTime = DateTime.Now };
+                // _cache.SetString("LastMessage", Convert.ToString(message.Content) );
 
-            _redis_db.InsertMessage(user,message);
+                _redis_db.InsertMessage(user, message);
 
-            System.Diagnostics.Debug.WriteLine(model.Content);
-            await Clients.Group(user.GroupId).InvokeAsync("Receive", message);
+                System.Diagnostics.Debug.WriteLine(model.Content);
+                await Clients.Group(user.GroupId).InvokeAsync("Receive", message);
+            }
         }
         public async Task Kick(UserDetail target)
         {
@@ -179,6 +189,10 @@ namespace ChannelX.Hubs
                     if (channel.OwnerId != target.UserId)
                     {
                         await Clients.Client(target.ConnectionId).InvokeAsync("Disconnect");
+
+                        target.ConnectionId = "";
+
+                        await UpdateState(target);
                     }
                 }
             }
@@ -196,6 +210,7 @@ namespace ChannelX.Hubs
 
                     channelUserDb.State = (int)UserStates.Blocked;
                     target.State = channelUserDb.State;
+                    target.ConnectionId = "";
 
                     await _db.SaveChangesAsync();
 
@@ -243,6 +258,7 @@ namespace ChannelX.Hubs
 
                     channelUserDb.State = (int)UserStates.Joined;
                     target.State = channelUserDb.State;
+
                     await _db.SaveChangesAsync();
 
                     await UpdateState(target);

@@ -24,7 +24,6 @@ interface userDetail {
     ConnectionId: string,
     Name: string,
     GroupId: string,
-    Authorized: boolean,
     State: UserStates
 }
 
@@ -191,11 +190,14 @@ export default class ChannelOpenComponent extends Vue {
         this.connection.invoke('join', { channelId: this.id });
     }
     async disconnect() {
-        console.log("disconnect...");
+
         if (this.connection) {
             this.disconnected = true;
+
             await this.connection.invoke('leave');
+
             this.connection.stop();
+
             await swal({
                 text: "You have been disconnected from channel.",
                 icon: 'error'
@@ -209,36 +211,37 @@ export default class ChannelOpenComponent extends Vue {
         this.me(users);
         this.users = users;
         this.loading = false;
-        console.log("NEW USER LIST")
 
     }
 
     userLeft(user: userDetail) {
-        let index = this.users.findIndex(i => i.ConnectionId == user.ConnectionId);
+        console.log("userLeft", user)
+        let index = this.users.findIndex(i => i.UserId == user.UserId);
+
         if (index > -1) {
-            let me = this.users.findIndex(i => i.UserId === this.userId);
-            let model: textModel = { Content: this.users[index].Name + ' is left the channel.', User: undefined, SentTime: new Date() };
-            this.users.splice(index, 1);
+            let model: textModel = { Content: this.users[index].Name + ' is offline.', User: undefined, SentTime: new Date() };
             this.chats.push(model)
+            this.updateState(user);
+            //this.$forceUpdate();
         }
+
     }
 
     userJoined(user: userDetail) {
-        console.log("User Joined", user);
         let index = this.users.findIndex(i => i.UserId === user.UserId);
 
         if (index == -1) {
-            let me = this.users.findIndex(i => i.UserId === this.userId);
-
             let model: textModel = { Content: user.Name + ` is join the channel.`, User: undefined, SentTime: new Date() };
             this.chats.push(model);
             this.users.push(user);
-            let a: number;
-            a = 0;
-            var d = a == UserStates.Blocked;
+        }
+        else {
+            let model: textModel = { Content: user.Name + ` is online.`, User: undefined, SentTime: new Date() };
+            this.chats.push(model);
+            this.updateState(user);
         }
 
-        this.$forceUpdate();
+        //this.$forceUpdate();
     }
 
     send() {
@@ -301,13 +304,16 @@ export default class ChannelOpenComponent extends Vue {
         }
     }
 
-    updateState(user: userDetail)
-    {
-        console.log("updateState");
+    updateState(user: userDetail) {
         this.users.forEach(element => {
-            if(element.UserId == user.UserId)
+            if (element.UserId == user.UserId) {
                 element.State = user.State;
+                element.ConnectionId = user.ConnectionId;
+            }
         });
+        if (this.user && this.user.UserId === user.UserId) {
+            this.user.State = user.State;
+        }
     }
 
     isBlocked(val: UserStates) { return val === UserStates.Blocked; }
