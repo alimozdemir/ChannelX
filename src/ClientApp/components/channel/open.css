@@ -135,6 +135,9 @@ container.scrollTop = container.scrollHeight;
         text-decoration: underline;
     }
 
+    .blocked{
+        text-decoration: line-through;
+    }
 
 /* todo */
 @-webkit-keyframes online-color {

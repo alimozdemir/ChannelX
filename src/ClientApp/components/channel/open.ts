@@ -8,6 +8,7 @@ import swal from 'sweetalert';
 import { UserStore, UserState } from '../../stores/userState'
 import UserComponent from "../user/user";
 import './open.css';
+import { ButtonList,ButtonOptions } from 'sweetalert/typings/modules/options/buttons';
 
 interface getModel {
     id: number,
@@ -183,10 +184,11 @@ export default class ChannelOpenComponent extends Vue {
         await this.connection.start();
         this.connection.on('userList', this.userList);
         this.connection.on('userLeft', this.userLeft);
-        this.connection.on('userJoined', this.userJoined)
-        this.connection.on('receive', this.receive)
-        this.connection.on('disconnect', this.disconnect)
-        this.connection.on('updateState', this.updateState)
+        this.connection.on('userJoined', this.userJoined);
+        this.connection.on('receive', this.receive);
+        this.connection.on('disconnect', this.disconnect);
+        this.connection.on('updateState', this.updateState);
+        this.connection.on('alreadyConnnected', this.alreadyConnnected);
         this.connection.invoke('join', { channelId: this.id });
     }
     async disconnect() {
@@ -279,6 +281,45 @@ export default class ChannelOpenComponent extends Vue {
                     }
                 }
             });
+    }
+
+    async alreadyConnnected() {
+
+        let result = await swal({
+            text: "This channel is open on another window or browser. Click 'Use Here' to join channel from this window.",
+            icon: 'warning',
+            dangerMode: true,
+            buttons: {
+                cancel : {
+                    text: 'Cancel',
+                    value: false,
+                    visible: true,
+                    className: '',
+                    closeModal: true
+                },
+                confirm: {
+                    text: 'Use Here',
+                    value: true,
+                    visible: true,
+                    className: '',
+                    closeModal: true
+                }
+            }
+        })
+
+        if (result){
+            if(this.connection){
+                this.connection.invoke('closeAllWindows');
+                this.connection.invoke('join', { channelId: this.id });
+            }
+        }
+        else {
+            if (this.connection) {
+                this.connection.stop();
+            }
+
+            this.$router.push('/');
+        }
     }
 
     block(user: userDetail) {

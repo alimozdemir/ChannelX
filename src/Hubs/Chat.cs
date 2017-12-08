@@ -91,12 +91,22 @@ namespace ChannelX.Hubs
                         await Clients.Client(Context.ConnectionId).InvokeAsync("Disconnect");
                     }
                 }
-
+                
+                // online users
+                var users = (await _tracker.All(model.ChannelId.ToString())).ToList();
+                
+                if (users.Any(i => i.UserId.Equals(userId)))
+                {
+                    await Clients.Client(Context.ConnectionId).InvokeAsync("AlreadyConnnected");
+                    return;
+                }
+                
                 await Groups.AddAsync(Context.ConnectionId, model.ChannelId.ToString());
 
                 var userDetail = new UserDetail(Context.ConnectionId, user.UserName, model.ChannelId.ToString(), userId,
                                         channel.OwnerId == userId ? (int)UserStates.Authorize : userEngage.State);
 
+                users.Add(userDetail);
                 _tracker.Add(Context.Connection, userDetail);
                 #region User List
                 // load user list
@@ -115,8 +125,6 @@ namespace ChannelX.Hubs
                                         channel.OwnerId,
                                         (int)UserStates.Authorize));
 
-                // online users
-                var users = (await _tracker.All(model.ChannelId.ToString())).ToList();
 
                 // if users online take the connection ids
                 foreach (var item in users)
@@ -270,6 +278,18 @@ namespace ChannelX.Hubs
         private async Task UpdateState(UserDetail user)
         {
             await Clients.Group(user.GroupId).InvokeAsync("UpdateState", user);
+        }
+
+        public async Task CloseAllWindows()
+        {
+            var userId = Context.User.GetUserId();
+            var users = (await _tracker.All()).Where(i => i.UserId.Equals(userId) 
+                                && !i.ConnectionId.Equals(Context.ConnectionId)).ToList();
+            
+            foreach(var item in users) 
+            {
+                await Clients.Client(item.ConnectionId).InvokeAsync("Disconnect");
+            }
         }
     }
 }
