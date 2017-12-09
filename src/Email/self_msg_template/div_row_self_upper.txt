@@ -1,0 +1,9 @@
+<div id="self_mes" class="container" style="max-width: 600px; margin: 0 auto; width: 100%; padding: 5px; border: 1px solid #D8AFFF; border-radius: 25px; border-spacing: 1px 1px; text-align: right; margin-bottom: 10px;">
+                        <!--[if mso | IE]>
+                          <table class="container__table__ie" role="presentation" border="0" cellpadding="0" cellspacing="0" style=" margin-right: auto; margin-left: auto;width: 600px" width="600" align="center">
+                            <tr>
+                              <td> <![endif]-->
+                                <table class="container__table" role="presentation" border="0" align="center" cellpadding="0" cellspacing="0" width="100%" style="border-spacing: 1px 1px;">
+                                  <tr class="container__row">
+                                    <td class="container__cell" width="100%" align="left" valign="top" style="padding: 5px; border: 1px solid #D8AFFF; border-radius: 25px;">
+                                      <h4 id="self" class="header h4" style="margin: 20px 0; color: #000000; font-family: Helvetica,Arial,sans-serif; text-align: right;">

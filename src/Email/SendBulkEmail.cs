@@ -46,7 +46,7 @@ public class SendBulkEmail : IJob
     public async Task Execute(IJobExecutionContext context)
     {
         Console.WriteLine("Trying to execute the job.");
-        //GenerateBulkEmailAsync();
+        GenerateBulkEmailAsync();
     }
 
     public async Task GenerateBulkEmailAsync()
@@ -110,7 +110,7 @@ public class SendBulkEmail : IJob
                     Console.WriteLine(finalized_mail_body);
                     Console.WriteLine("--");
                     // Send the email to user
-                    await _emailSender.SendEmailAsync("itu.channelx@gmail.com", "subject", "Hello World!");
+                    await _emailSender.SendEmailAsync("itu.channelx@gmail.com", "subject", finalized_mail_body);
                 }
             }
         }
@@ -120,24 +120,24 @@ public class SendBulkEmail : IJob
     public string GetFormattedMessage(List<TextModel> message_list, ChannelUser current_user)
     {
         var finalized_message = "";
+        finalized_message+=System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\latest_feed_header.txt");;
         foreach(var mes in message_list)
         {
             if (mes.User.UserId == current_user.UserId)
             {
-                Console.WriteLine("Heleluya!");
-                Console.WriteLine(mes.User.Name);
-                Console.WriteLine(mes.Content);
-                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\div_row_upper.txt");
-                finalized_message += "<div large=\"12\">" + mes.User.Name + "<br>" + mes.Content + "</div>";
-                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\div_row_lower.txt");
+                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\self_msg_template\\div_row_self_upper.txt");
+                finalized_message += mes.User.Name;
+                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\self_msg_template\\div_row_self_middle.txt");
+                finalized_message += mes.Content;
+                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\self_msg_template\\div_row_self_lower.txt");
             }
             else
             {
-                Console.WriteLine(mes.User.Name);
-                Console.WriteLine(mes.Content);
-                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\div_row_upper.txt");
-                finalized_message += "<div large=\"12\">" + mes.User.Name + "<br>" + mes.Content + "</div>";
-                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\div_row_lower.txt");
+                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\other_ppl_msg_template\\div_row_other_upper.txt");
+                finalized_message += mes.User.Name;
+                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\other_ppl_msg_template\\div_row_other_middle.txt");
+                finalized_message += mes.Content;
+                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\other_ppl_msg_template\\div_row_other_lower.txt");
             }
         }
         return finalized_message;
