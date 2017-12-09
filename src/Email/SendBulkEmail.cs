@@ -46,10 +46,7 @@ public class SendBulkEmail : IJob
     public async Task Execute(IJobExecutionContext context)
     {
         Console.WriteLine("Trying to execute the job.");
-        // GenerateBulkEmailAsync();
-        // SMTP TEST START
-        // await _emailSender.SendEmailAsync("asdfgh1453@mynet.com", "subject", "Enter email body here");
-        // -----SMTP TEST END
+        //GenerateBulkEmailAsync();
     }
 
     public async Task GenerateBulkEmailAsync()
@@ -113,8 +110,7 @@ public class SendBulkEmail : IJob
                     Console.WriteLine(finalized_mail_body);
                     Console.WriteLine("--");
                     // Send the email to user
-                    await _emailSender.SendEmailAsync("itu.channelx@gmail.com", "subject", finalized_mail_body);
-                    break;
+                    await _emailSender.SendEmailAsync("itu.channelx@gmail.com", "subject", "Hello World!");
                 }
             }
         }
@@ -124,9 +120,6 @@ public class SendBulkEmail : IJob
     public string GetFormattedMessage(List<TextModel> message_list, ChannelUser current_user)
     {
         var finalized_message = "";
-        Console.WriteLine(_env.ContentRootPath + "\\Email\\heml_upper.txt");
-        // Add upper part of the mail to bulk
-        finalized_message+= System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\heml_upper.txt");
         foreach(var mes in message_list)
         {
             if (mes.User.UserId == current_user.UserId)
@@ -147,8 +140,6 @@ public class SendBulkEmail : IJob
                 finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\div_row_lower.txt");
             }
         }
-        // Add lower part of the mail to bulk
-        finalized_message+= System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\heml_lower.txt");
         return finalized_message;
     }
 }

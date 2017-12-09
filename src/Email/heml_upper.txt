@@ -67,7 +67,7 @@
       table td { border-collapse: collapse; }
       </style>
       <![endif]-->
-    <title>Welcome to HEML!</title>
+    <title> </title>
     <!-- content -->
     <!--[if gte mso 9]><xml>
        <o:OfficeDocumentSettings>
@@ -76,27 +76,38 @@
        </o:OfficeDocumentSettings>
       </xml><![endif]-->
   </head>
-  <body class="body" style="background-color: #87CEEB; margin: 0; width: 100%;">
-    <table class="bodyTable" role="presentation" width="100%" align="left" border="0" cellpadding="0" cellspacing="0" style="width: 100%; background-color: #87CEEB; margin: 0;" bgcolor="#87CEEB">
+  <body class="body" style="background-color: #C6FFF1; margin: 0; width: 100%;">
+    <table class="bodyTable" role="presentation" width="100%" align="left" border="0" cellpadding="0" cellspacing="0" style="width: 100%; background-color: #C6FFF1; margin: 0;" bgcolor="#C6FFF1">
       <tr>
         <td class="body__content" align="left" width="100%" valign="top" style="color: #000000; font-family: Helvetica,Arial,sans-serif; font-size: 16px; line-height: 20px;">
-          <div class="container" style="margin: 0 auto; max-width: 600px; width: 100%;"> <!--[if mso | IE]>
-            <table class="container__table__ie" role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-right: auto; margin-left: auto;width: 600px" width="600" align="center">
+          <div id="main_cont" class="container" style="max-width: 600px; margin: 0 auto; width: 600px;"> <!--[if mso | IE]>
+            <table class="container__table__ie" role="presentation" border="0" cellpadding="0" cellspacing="0" style=" margin-right: auto; margin-left: auto;width: 600px" width="600" align="center">
               <tr>
                 <td> <![endif]-->
                   <table class="container__table" role="presentation" border="0" align="center" cellpadding="0" cellspacing="0" width="100%">
                     <tr class="container__row">
                       <td class="container__cell" width="100%" align="left" valign="top">
-                        <h2 class="header h2" style="margin: 20px 0; line-height: 30px; color: #000000; font-family: Helvetica,Arial,sans-serif;">Latest Message Feed</h2>
-                      </td>
-                    </tr>
-                  </table> <!--[if mso | IE]> </td>
-              </tr>
-            </table> <![endif]--> </div>
-          <div class="container" style="margin: 0 auto; max-width: 600px; width: 100%;"> <!--[if mso | IE]>
-            <table class="container__table__ie" role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-right: auto; margin-left: auto;width: 600px" width="600" align="center">
-              <tr>
-                <td> <![endif]-->
-                  <table class="container__table" role="presentation" border="0" align="center" cellpadding="0" cellspacing="0" width="100%">
-                    <tr class="container__row">
-                      <td class="container__cell" width="100%" align="left" valign="top">
+                        <div class="container" style="max-width: 600px; margin: 0 auto; width: 100%;"> <!--[if mso | IE]>
+                          <table class="container__table__ie" role="presentation" border="0" cellpadding="0" cellspacing="0" style=" margin-right: auto; margin-left: auto;width: 600px" width="600" align="center">
+                            <tr>
+                              <td> <![endif]-->
+                                <table class="container__table" role="presentation" border="0" align="center" cellpadding="0" cellspacing="0" width="100%">
+                                  <tr class="container__row">
+                                    <td class="container__cell" width="100%" align="left" valign="top">
+                                      <h2 class="header h2" style="margin: 20px 0; line-height: 30px; color: #000000; font-family: Helvetica,Arial,sans-serif;">ChannelX</h2>
+                                      <div class="hr" style="margin: 0 auto; width: 100%;"> <!--[if mso | IE]>
+                                        <table class="hr__table__ie" role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-right: auto; margin-left: auto; width: 100%;" width="100%" align="center">
+                                          <tr>
+                                            <td> <![endif]-->
+                                              <table class="hr__table" role="presentation" border="0" align="center" cellpadding="0" cellspacing="0" width="100%" style="table-layout: fixed;">
+                                                <tr class="hr__row">
+                                                  <td class="hr__cell" width="100%" align="left" valign="top" style="border-top: 1px solid #9A9A9A;">&nbsp;</td>
+                                                </tr>
+                                              </table> <!--[if mso | IE]> </td>
+                                          </tr>
+                                        </table> <![endif]--> </div>
+                                    </td>
+                                  </tr>
+                                </table> <!--[if mso | IE]> </td>
+                            </tr>
+                          </table> <![endif]--> </div>

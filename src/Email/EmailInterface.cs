@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using ChannelX.Models.Configuration;
+using Microsoft.AspNetCore.Hosting;
 using System.Net.Mail;
 using System.Net;
 
@@ -14,9 +15,11 @@ namespace ChannelX.Email
 {
 public class AuthMessageSender : IEmailSender
     {
-        public AuthMessageSender(IOptions<EmailSettings> emailSettings)
+        public IHostingEnvironment _env;
+        public AuthMessageSender(IOptions<EmailSettings> emailSettings, IHostingEnvironment env)
         {
             _emailSettings = emailSettings.Value;
+            _env = env;
         }
 
         public EmailSettings _emailSettings { get; }
@@ -52,7 +55,17 @@ public class AuthMessageSender : IEmailSender
             // mail.CC.Add(new MailAddressCollection(_emailSettings.CcEmail));
 
             mail.Subject = "ChannelX Mail System - " + subject;
-            mail.Body = message;
+
+            // Construct the message body
+            var finalized_message = "";
+            // Add upper part of the mail
+            finalized_message+= System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\heml_upper.txt");
+            // Add message body part of the mail 
+            finalized_message+= message;
+            // Add lower part of the mail
+            finalized_message+= System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\heml_lower.txt");
+
+            mail.Body = finalized_message;
             mail.IsBodyHtml = true;
             mail.Priority = MailPriority.High;
 
