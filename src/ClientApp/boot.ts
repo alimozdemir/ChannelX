@@ -33,6 +33,7 @@ const routes = [
         children : [
             { path : '/login', component : require('./components/login/login.vue.html') },
             { path: '/register', component: require('./components/register/register.vue.html') },
+            { name: '/resetpass', path: '/resetpass/:hash', component: require('./components/resetpassword/resetpassword.vue.html'), props: true  },
             { path: '/forgotpassword', component: require('./components/forgotpassword/forgotpassword.vue.html') },
         ]
     }
