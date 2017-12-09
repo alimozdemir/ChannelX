@@ -46,7 +46,7 @@ public class SendBulkEmail : IJob
     public async Task Execute(IJobExecutionContext context)
     {
         Console.WriteLine("Trying to execute the job.");
-        GenerateBulkEmailAsync();
+        //GenerateBulkEmailAsync();
     }
 
     public async Task GenerateBulkEmailAsync()
