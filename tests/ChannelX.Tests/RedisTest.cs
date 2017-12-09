@@ -3,6 +3,8 @@ using Xunit;
 using ChannelX.Redis;
 using Moq;
 using StackExchange.Redis;
+using ChannelX.Models.Trackers;
+using ChannelX.Models.Chat;
 
 namespace ChannelX.Tests
 {
@@ -94,12 +96,22 @@ namespace ChannelX.Tests
         [Fact]
         public void InsertMessageTest()
         {
-            // TODO
+            UserDetail user = new UserDetail(new Guid().ToString(),"alim","20","1",1);
+            TextModel message = new TextModel();
+            message.Content = "message";
+            message.SentTime = DateTime.Now;
+            message.User = user;
+            var obj = new RedisConnection(mockObject.Object);
+            Assert.True(obj.InsertMessage(user,message));
+
         }
         [Fact]
         public void UpdateLastSeenTest()
         {
-            // TODO
+            UserDetail user = new UserDetail(new Guid().ToString(),"alim","20","1",1);
+            var obj = new RedisConnection(mockObject.Object);
+            Assert.True(obj.UpdateLastSeen(user));
+            
         }
     }
 }
