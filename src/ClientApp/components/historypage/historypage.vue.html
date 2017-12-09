@@ -1,6 +1,7 @@
 <template>
     <form>
         <div class="historypage">
+            <div v-if="loading" class="loading">Loading&#8230;</div>
             <div class="form-horizontal">
                 <div>
                     <h1>Channel History Page</h1>
@@ -38,6 +39,18 @@
                             </tr>
                         </tbody>
                     </table>
+                    <div class="pull-right" v-if="!loading">
+                        Show 
+                        <select name="count" v-model="page.count" id="count" v-on:change="get">
+                            <option v-for="item in counts" v-bind:value="item">{{item}}</option>
+                        </select>
+                        Per Page
+                        <select v-model="page.currentPage" id="currentPage" name="currentPage" v-on:change="get">
+                            <option v-for="i in pages">{{i}}</option>
+                        </select>
+                    </div>
+                    <div class="clearfix"></div>
+
                 </div>
             </div>
         </div>

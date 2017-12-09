@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using ChannelX.Data;
 
 namespace ChannelX.Models.Channel
@@ -12,5 +13,12 @@ namespace ChannelX.Models.Channel
         public List<String> EngagedUsersName { get; set; }
         public DateTime CreatedAt { get; set; }
 
+    }
+
+    public class HistoryPaginationModel
+    {
+        public int Total { get; set; }
+        public int CurrentPage { get; set; }
+        public int Count { get; set; }
     }
 }

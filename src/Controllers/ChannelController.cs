@@ -64,8 +64,10 @@ namespace ChannelX.Controllers
         [HttpGet("[action]")]
         public async Task<IActionResult> Public()
         {
+            var userId = User.GetUserId();
             var list = await _db.Channels
-                        .Where(i => i.EndAt > DateTime.Now && !i.IsPrivate)
+                        .Where(i => i.EndAt > DateTime.Now && !i.IsPrivate && !i.Users.Any(u => u.UserId.Equals(userId))
+                                    && i.OwnerId != userId)
                         .Select(i => new ListModel()
                         {
                             Id = i.Id,
@@ -84,7 +86,8 @@ namespace ChannelX.Controllers
             var userId = User.GetUserId();
 
             var list = await _db.Channels
-                        .Where(i => i.EndAt > DateTime.Now && i.Users.Any(u => u.UserId == userId))
+                        .Where(i => i.EndAt > DateTime.Now && ((i.Users.Any(u => u.UserId == userId
+                                        && u.State != (int)UserStates.Blocked)) || i.OwnerId == userId))
                         .Select(i => new ListModel()
                         {
                             Id = i.Id,
@@ -253,24 +256,39 @@ namespace ChannelX.Controllers
         }
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> HistoryPage()
+        public async Task<IActionResult> HistoryPage(HistoryPaginationModel model)
         {
-            var userId = User.GetUserId();
+            if (model.Count > 0 && model.CurrentPage >= 0 && model.Total > 0)
+            {
+                var userId = User.GetUserId();
 
-            var list = await _db.Channels
-                        .Include(i => i.Users)
-                        .Select(i => new HistoryModel()
-                        {
-                            Id = i.Id,
-                            Title = i.Title,
-                            EndAt = i.EndAt,
-                            CreatedAt = i.CreatedAt,
-                            EngagedUsersName = i.Users.Select(j => j.User.UserName).ToList(),
-                        })
-                        .ToListAsync();
+                var list = await _db.Channels
+                            .Include(i => i.Users)
+                            .Where(i => i.Owner.Equals(userId) || i.Users.Any(u => u.UserId.Equals(userId)))
+                            .Skip((model.CurrentPage - 1) * model.Count)
+                            .Take(model.Count)
+                            .Select(i => new HistoryModel()
+                            {
+                                Id = i.Id,
+                                Title = i.Title,
+                                EndAt = i.EndAt,
+                                CreatedAt = i.CreatedAt,
+                                EngagedUsersName = i.Users.Select(j => j.User.UserName).ToList(),
+                            })
+                            .ToListAsync();
+                return Json(list);
+            }
+            else
+                return Json(null);
 
-            return Json(list);
         }
 
+        [HttpGet("[action]")]
+        public async Task<IActionResult> HistoryPageTotal()
+        {
+            var userId = User.GetUserId();
+            var total = await _db.Channels.CountAsync(i => i.OwnerId.Equals(userId) || i.Users.Any(u => u.UserId.Equals(userId)));
+            return Json(total);
+        }
     }
 }

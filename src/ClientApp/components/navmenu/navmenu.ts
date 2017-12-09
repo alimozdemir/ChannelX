@@ -2,6 +2,7 @@ import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
 import axios from 'axios';
 import moment from 'moment';
+import { UserStore } from '../../stores/userState';
 
 interface channelListModel {
     id: number,
@@ -29,13 +30,14 @@ export default class NavMenuComponent extends Vue {
             that.refresh();
         }, 1000)
         
-        var id = await setInterval(async () => { await this.refresh() }, 60000)
-        localStorage.setItem('interval', id.toString())
+        var id = await setInterval(async () => { await this.refresh() }, 20000)
+
+        UserStore.commitInterval(this.$store, id.toString())
     }
 
     async refresh(){
         await this.list_public();
-        await this.list_engaged();
+        await this.list_active();
     }
 
     async list_public() {
@@ -50,7 +52,7 @@ export default class NavMenuComponent extends Vue {
     }
 
 
-    async list_engaged() {
+    async list_active() {
         let result = await axios.get('/api/Channel/Engaged');
 
         if(result.status == 200)

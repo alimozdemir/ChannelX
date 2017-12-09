@@ -22,25 +22,28 @@ export default class LoginComponent extends Vue {
     model: loginModel = { userName: "", password: "", rememberMe: false }
 
     async login() {
-        let result = await axios.post('/api/Account/Login', this.model);
+        this.$validator.validateAll();
+        let error = this.$validator.errors.any();
+        if (!error) {
+            let result = await axios.post('/api/Account/Login', this.model);
 
-        if (result.status == 200) {
-            let data = result.data as resultModel;
+            if (result.status == 200) {
+                let data = result.data as resultModel;
 
-            if (data.succeeded) {
-                var userData = data.data as UserData;
-                UserStore.commitAuthKey(this.$store, userData.auth);
-                UserStore.commitUserId(this.$store, userData.userId);
-                console.log(userData)
-                console.log(UserStore.readAuthKey(this.$store))
-                this.$router.push('/');
+                if (data.succeeded) {
+                    var userData = data.data as UserData;
+                    UserStore.commitAuthKey(this.$store, userData.auth);
+                    UserStore.commitUserId(this.$store, userData.userId);
+
+                    this.$router.push('/');
+                }
+                else
+                    swal({ text: data.message, icon: "error" });
             }
-            else
-                swal({ text: data.message, icon: "error" });
-        }
-        else {
-            swal({ text: "something went wrong", icon: "error" });
+            else {
+                swal({ text: "something went wrong", icon: "error" });
+            }
         }
     }
-    
+
 }

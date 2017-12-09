@@ -6,38 +6,32 @@ import './topmenu.css';
 import UserComponent from '../user/user';
 
 @Component({
-    computed : {
-        getUserName(){
+    computed: {
+        getUserName() {
             return UserStore.readUserName(this.$store);
         }
     }
 })
 export default class TopMenuComponent extends Vue {
 
-    mounted() {
-
-        
-    }
-    
-    async showMe(){
+    async showMe() {
         let id = UserStore.readUserId(this.$store);
         let popup = new UserComponent(id);
 
         await popup.show();
     }
 
-    logout(){
-        
+    logout() {
+
         UserStore.commitUserId(this.$store, "");
         UserStore.commitAuthKey(this.$store, "");
         // to stop infinite interval
-        let id = localStorage.getItem('interval');
+        let id = UserStore.readInterval(this.$store);
 
-        if (id != null)
-        {
+        if (id) {
             let interval = parseInt(id);
-            localStorage.removeItem('interval');
-            clearInterval(interval);            
+            //localStorage.removeItem('interval');
+            clearInterval(interval);
         }
 
         this.$router.push('/login');

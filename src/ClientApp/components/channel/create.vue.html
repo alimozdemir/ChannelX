@@ -4,9 +4,10 @@
             <span class="glyphicon glyphicon-plus"></span> New Channel</h2>
         <div class="form-horizontal">
             <div class="form-group">
-                <label class="control-label col-sm-2" for="email">Title:</label>
+                <label class="control-label col-sm-2" for="email">Title (*):</label>
                 <div class="col-sm-10">
-                    <input type="text" v-model="model.title" class="form-control" placeholder="Enter title" name="title">
+                    <input type="text"  v-validate="'required'" v-model="model.title" class="form-control" placeholder="Enter title" name="title" data-vv-as="Title">
+                    <span class="error" v-show="errors.has('title')">{{ errors.first('title') }}</span>
                 </div>
             </div>
             <div class="form-group">
@@ -16,7 +17,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="control-label col-sm-2" for="email">How long (h) ? :</label>
+                <label class="control-label col-sm-2" for="email">How long (hours) ? :</label>
                 <div class="col-sm-10">
                     <input type="number" v-model="model.endAtHours" class="form-control" min="1" placeholder="2" name="endAtHours">
                 </div>
@@ -33,7 +34,6 @@
                 <div class="col-sm-offset-2 col-sm-10">
                     <button type="submit" @click="submit" class="btn btn-success">Submit</button>
                     <button type="reset" @click="reset" class="btn btn-default">Clear</button>
-                    <button @click="test" class="btn btn-default">Testt</button>
                 </div>
             </div>
         </div>

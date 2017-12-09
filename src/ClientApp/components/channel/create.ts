@@ -19,41 +19,35 @@ export default class ChannelCreateComponent extends Vue {
     model: createModel = Object.assign({}, defaultModel); //shallow copy
 
     async submit() {
-        let result = await axios.post('/api/Channel/Create', this.model);
+        this.$validator.validateAll();
+        let error = this.$validator.errors.any();
 
-        if (result.status == 200) {
-            let response = result.data as resultModel;
+        if (!error) {
+            let result = await axios.post('/api/Channel/Create', this.model);
 
-            if (response.succeeded) {
-                let data = response.data as string;
+            if (result.status == 200) {
+                let response = result.data as resultModel;
 
-                swal(
-                    {
-                        title: response.message, 
-                        icon: "success",
-                        content: {
-                            element: 'input',
-                            attributes: {
-                                value: data
+                if (response.succeeded) {
+                    let data = response.data as string;
+
+                    swal(
+                        {
+                            title: response.message,
+                            icon: "success",
+                            content: {
+                                element: 'input',
+                                attributes: {
+                                    value: data
+                                }
                             }
-                        }
-                    });
+                        });
+                }
             }
         }
+
     }
-    test(){
-        swal(
-            {
-                title: "test", 
-                icon: "success",
-                content: {
-                    element : 'input',
-                    attributes : {
-                        value : "123"
-                    }
-                }
-            });
-    }
+
     reset() {
         this.model = Object.assign({}, defaultModel); //shallow copy
     }

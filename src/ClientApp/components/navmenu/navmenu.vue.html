@@ -15,7 +15,6 @@
                 <ul class="nav navbar-nav">
                     <li>Public Channels</li>
                     <li v-for="item in publicList">
-
                         <router-link :to="{ name: '/channel/open', params : { id : item.id } }">
                             {{ item.title }}
                             <span class="glyphicon glyphicon-time"></span> {{ item.endTime | duration }}
@@ -24,12 +23,12 @@
                     <li v-if="publicList.length == 0">
                         <a href="javascript:;">None</a>
                     </li>
-                    <li>Engaged Channels</li>
+                    <li>Active Channels</li>
                     <li v-for="item in engagedList">
-                        <a href="#">
+                        <router-link :to="{ name: '/channel/open', params : { id : item.id } }">
                             {{ item.title }}
                             <span class="glyphicon glyphicon-time"></span> {{ item.endTime | duration }}
-                        </a>
+                        </router-link>
                     </li>
                     <li v-if="engagedList.length == 0">
                         <a href="javascript:;">None</a>
