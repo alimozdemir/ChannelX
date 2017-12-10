@@ -100,12 +100,7 @@ namespace ChannelX
 
             services.AddScoped<SendBulkEmail>();
             services.AddQuartz();
-            // -----EMAIL PART END
-
-            // services.AddDistributedRedisCache(opt => {
-            //     opt.Configuration = "127.0.0.1";
-            //     opt.InstanceName = "master";
-            // });
+ 
             
         }
 

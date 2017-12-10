@@ -2,13 +2,16 @@ using System;
 using System.Collections;
 using System.Threading.Tasks;
 using ChannelX.Data;
+using ChannelX.Email;
 using ChannelX.Redis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
@@ -16,9 +19,16 @@ namespace ChannelX.Tests
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IHostingEnvironment env)
         {
-            Configuration = configuration;
+            //Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile("emailsettings.json", optional: true)
+                .AddEnvironmentVariables();
+                
+            Configuration = builder.Build();
         }
 
         public IConfiguration Configuration { get; }
@@ -38,9 +48,7 @@ namespace ChannelX.Tests
             });
 
             var tokenConfiguration = Configuration.GetSection("Tokens");
-
-            Console.WriteLine(tokenConfiguration.GetValue<string>("Key"));
-
+            
             services.AddAuthentication()
                     .AddJwtBearer(options => {
                         options.TokenValidationParameters = new TokenValidationParameters
@@ -78,14 +86,30 @@ namespace ChannelX.Tests
             services.AddSignalR();
 
             services.AddSingleton<Models.Trackers.UserTracker>();
+            services.Configure<Models.Configuration.EmailSettings>(Configuration.GetSection("EmailSettings"));
+            // Registering email service
+            services.AddTransient<IEmailSender, AuthMessageSender>();
+            // Registering true email service
+
+            services.AddScoped<SendBulkEmail>();
+
+            //services.AddQuartz();
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
             /*using(var context = app.ApplicationServices.GetService<DatabaseContext>())
             {
                 InitializeDatabase(context);
             }*/
+            loggerFactory.AddDebug();
+            loggerFactory.AddConsole();
+            
+            app.UseDeveloperExceptionPage();
+            app.UseWebpackDevMiddleware(new Microsoft.AspNetCore.SpaServices.Webpack.WebpackDevMiddlewareOptions
+                {
+                    HotModuleReplacement = true
+                });
 
             app.UseStaticFiles();
 
@@ -126,12 +150,16 @@ namespace ChannelX.Tests
                 Console.WriteLine(_userManager == null ? "is null" : "not null");
                 var user = new ApplicationUser { UserName = "deneme",FirstAndLastName="alim",Email = "ozdemirali@itu.edu.tr" };
                 _userManager.CreateAsync(user, "Deneme123!");
+
+                var _jwtHelper = app.ApplicationServices.GetService<Token.JwtSecurityHelper>();
+                var token = _jwtHelper.GetToken(user.Id);
+                var key = _jwtHelper.GetTokenValue(token);
+                AuthKey = key;
             }
         }
 
-        /*public IEnumerable<Channel> GetChannelSession()
-        {
+        // General purpose auth key for 'deneme' user
+        public static string AuthKey {get; set;}
 
-        }*/
     }
 }
