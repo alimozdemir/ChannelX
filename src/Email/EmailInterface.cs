@@ -38,8 +38,7 @@ public class AuthMessageSender : IEmailSender
             // If emailsettings.json read failed, code should not process further
             if (_emailSettings.UsernameEmail == null)
             {
-                Console.WriteLine("Warning: emailsetting.json is not read! You need a "
-                   + "working SMTP information.");
+                System.Diagnostics.Debug.WriteLine("emailsettings.json is not loaded!");
                 return;
             }
 
@@ -49,21 +48,15 @@ public class AuthMessageSender : IEmailSender
             };
 
             mail.To.Add(new MailAddress(toEmail));
-
-            Console.WriteLine("keeeeeeeeeeeeeeeeeeek1");
-
-            // mail.CC.Add(new MailAddressCollection(_emailSettings.CcEmail));
-
             mail.Subject = "ChannelX Mail System - " + subject;
-
             // Construct the message body
             var finalized_message = "";
             // Add upper part of the mail
-            finalized_message+= System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\heml_upper.txt");
+            finalized_message+= System.IO.File.ReadAllText(_env.ContentRootPath + "\\wwwroot\\email_templates\\heml_upper.txt");
             // Add message body part of the mail 
             finalized_message+= message;
             // Add lower part of the mail
-            finalized_message+= System.IO.File.ReadAllText(_env.ContentRootPath + "\\Email\\heml_lower.txt");
+            finalized_message+= System.IO.File.ReadAllText(_env.ContentRootPath + "\\wwwroot\\email_templates\\heml_lower.txt");
 
             mail.Body = finalized_message;
             mail.IsBodyHtml = true;
@@ -74,13 +67,9 @@ public class AuthMessageSender : IEmailSender
                 smtp.Credentials = new NetworkCredential(_emailSettings.UsernameEmail, _emailSettings.UsernamePassword);
                 smtp.EnableSsl = true;
                 await smtp.SendMailAsync(mail);
-                Console.WriteLine("keeeeeeeeeeeeeeeeeeek2");
+                System.Diagnostics.Debug.WriteLine("Sending Email.");
             }            
-
-             //do something here
-            Console.WriteLine("HAAAAAAAAAAAAAAA");
-
-          
+            System.Diagnostics.Debug.WriteLine("Process completed.");
         }
 
         Task IEmailSender.SendEmailAsync(string email, string subject, string message)
