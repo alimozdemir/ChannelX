@@ -11,12 +11,23 @@ using Microsoft.AspNetCore.Sockets.Client;
 using Microsoft.AspNetCore.Http.Features;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR.Internal.Protocol;
+using ChannelX.Tests.Fixtures;
 
 namespace ChannelX.Tests
 {
-    public class HubConnectionTest
+    public class HubConnectionTest : IClassFixture<TestFixture<Startup>>
     {
-        [Fact]
+        SocketConnectionFixture _connection;
+        TestFixture<Startup> _fixture;
+
+        public HubConnectionTest(TestFixture<Startup> fixture)
+        {
+            _connection = new SocketConnectionFixture();
+            _fixture = fixture;
+            
+        }
+
+        /*[Fact]
         public async Task ConnectionTest()
         {
             var mockObject = new Mock<IConnection>();
@@ -26,7 +37,27 @@ namespace ChannelX.Tests
             await conn.StartAsync();
             
             mockObject.Verify(c => c.StartAsync(), Times.Once());
+        }*/
+
+        [Fact]
+        public async Task ConnectionTest1()
+        {
+            // NOT WORKING
+            Console.WriteLine("CONNECTION TEST {0}", _fixture.Client.BaseAddress);
+            Console.WriteLine(Startup.AuthKey);
+            var response = await _fixture.Client.GetAsync("http://localhost:5000/api/chat");
+            Console.WriteLine(response);
+
+            /*var connection = new HubConnectionBuilder()
+                .WithUrl("http://localhost:5000/api/chat?token="+Startup.AuthKey)
+                .WithConsoleLogger()
+                .Build();
+                
+            await connection.StartAsync();*/
+            //await _connection.Connection.StartAsync();
         }
+
+
     }
 }
 

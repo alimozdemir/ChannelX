@@ -30,7 +30,7 @@ namespace ChannelX.Tests.Fixtures
                 .UseContentRoot(contentRoot)
                 .ConfigureServices(InitializeServices)
                 .UseEnvironment("Development")
-                .UseUrls("http://localhost:5000")
+                //.UseUrls("http://localhost:5000")
                 .UseStartup(typeof(TStartup));
 
 
