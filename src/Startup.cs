@@ -16,6 +16,7 @@ using Microsoft.Extensions.Primitives;
 // using Microsoft.Extensions.Caching.Redis;
 using ChannelX.Redis;
 using ChannelX.Email;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace ChannelX
 {
@@ -119,6 +120,11 @@ namespace ChannelX
             else
             {
                 app.UseExceptionHandler("/Home/Error");
+
+                app.UseForwardedHeaders(new ForwardedHeadersOptions
+                {
+                    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                });
             }
 
             app.UseStaticFiles();

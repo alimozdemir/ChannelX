@@ -16,20 +16,7 @@ module.exports = (env) => {
         module: {
             rules: [
                 { test: /\.vue\.html$/, include: /ClientApp/, loader: 'vue-loader', options: { loaders: { js: 'awesome-typescript-loader?silent=true' } } },
-                {
-                    test: /\.ts$/, include: /ClientApp/, 
-                    loaders: 'awesome-typescript-loader',
-                    query: {
-                        "useBabel": true,
-                        "babelOptions": {
-                            "babelrc": false, /* Important line */
-                            "presets": [
-                                ["env", { "targets": "last 2 versions, ie 11", "modules": false }]
-                            ]
-                        },
-                        "babelCore": "@babel/core", // needed for Babel v7
-                    }
-                },
+                { test: /\.ts$/, include: /ClientApp/, use: 'awesome-typescript-loader?silent=true' },
                 { test: /\.css$/, use: isDevBuild ? ['style-loader', 'css-loader'] : ExtractTextPlugin.extract({ use: 'css-loader?minimize' }) },
                 { test: /\.(png|jpg|jpeg|gif|svg)$/, use: 'url-loader?limit=25000' }
             ]
