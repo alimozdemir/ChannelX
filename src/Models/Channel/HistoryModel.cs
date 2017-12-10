@@ -12,6 +12,7 @@ namespace ChannelX.Models.Channel
         public DateTime EndAt { get; set; }
         public List<String> EngagedUsersName { get; set; }
         public DateTime CreatedAt { get; set; }
+        public string OwnerUserName { get; set; }
 
     }
 

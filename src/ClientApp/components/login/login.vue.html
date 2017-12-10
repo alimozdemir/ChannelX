@@ -5,14 +5,14 @@
                 <div class="form-group">
                     <label class="control-label col-md-2" for="user">Username</label>
                     <div class="col-md-10">
-                        <input v-validate="'required'" type="text" v-model="model.userName"data-vv-as="User Name" name="userName" class="form-control">
+                        <input @keyup.enter="login" v-validate="'required'" type="text" v-model="model.userName"data-vv-as="User Name" name="userName" class="form-control">
                         <span class="error" v-show="errors.has('userName')">{{ errors.first('userName') }}</span>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="control-label col-md-2" for="user">Password</label>
                     <div class="col-md-10">
-                        <input v-validate="'required'" type="password" v-model="model.password" name="password" data-vv-as="Password" class="form-control">
+                        <input @keyup.enter="login" v-validate="'required'" type="password" v-model="model.password" name="password" data-vv-as="Password" class="form-control">
                         <span class="error" v-show="errors.has('password')">{{ errors.first('password') }}</span>
                     </div>
                 </div>

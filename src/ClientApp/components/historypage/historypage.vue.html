@@ -9,9 +9,8 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Channel Number</th>
                                 <th>Channel Name</th>
-                                <th>Engaged Users</th>
+                                <th>Joined Users</th>
                                 <th>Duration (hour)</th>
                                 <th>Time (Last Accesible)</th>
                             </tr>
@@ -19,14 +18,11 @@
                         <tbody>
                             <tr v-for="item in modelList">
                                 <td>
-                                    {{item.id}}
+                                    <router-link :to="{ name: '/channel/open', params : { id : item.id } }">{{item.title}}</router-link>
                                 </td>
-                                <td>
-                                    {{item.title}}
-                                </td>
-                                <td>
+                                <td> <span style="font-weight: bold">{{item.ownerUserName}} </span>|
                                     <span v-for="user in item.engagedUsersName">
-                                        {{user}}
+                                        {{user}} |
                                     </span>
                                 </td>
                                 <td>
@@ -40,7 +36,7 @@
                         </tbody>
                     </table>
                     <div class="pull-right" v-if="!loading">
-                        Show 
+                        Show
                         <select name="count" v-model="page.count" id="count" v-on:change="get">
                             <option v-for="item in counts" v-bind:value="item">{{item}}</option>
                         </select>

@@ -12,7 +12,8 @@ interface historyModel {
     title: string,
     endAt: Date,
     createdAt: Date,
-    engagedUsersName: string[]
+    engagedUsersName: string[],
+    ownerUserName: string
 }
 
 interface historyPaginationModel {

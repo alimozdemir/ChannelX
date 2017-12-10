@@ -55,5 +55,19 @@ namespace ChannelX.Models.Trackers
 
             return null;
         }
+
+        public Task Update(UserDetail entity)
+        {
+            var user = _list.FirstOrDefault(i => i.Value.GroupId.Equals(entity.GroupId) && i.Value.UserId.Equals(entity.UserId));
+
+            if (user.Key != null && user.Value != null)
+            {
+                user.Value.ConnectionId = entity.ConnectionId;
+                user.Value.State = entity.State;
+            }
+
+            return Task.CompletedTask;
+        }
+
     }
 }

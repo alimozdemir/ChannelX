@@ -86,8 +86,8 @@ namespace ChannelX.Controllers
             var userId = User.GetUserId();
 
             var list = await _db.Channels
-                        .Where(i => i.EndAt > DateTime.Now && ((i.Users.Any(u => u.UserId == userId
-                                        && u.State != (int)UserStates.Blocked)) || i.OwnerId == userId))
+                        .Where(i => i.EndAt > DateTime.Now && (((i.Users.Any(u => u.UserId == userId
+                                        && u.State != (int)UserStates.Blocked)) || i.OwnerId == userId)))
                         .Select(i => new ListModel()
                         {
                             Id = i.Id,
@@ -273,6 +273,7 @@ namespace ChannelX.Controllers
                                 Title = i.Title,
                                 EndAt = i.EndAt,
                                 CreatedAt = i.CreatedAt,
+                                OwnerUserName = i.Owner.UserName,
                                 EngagedUsersName = i.Users.Select(j => j.User.UserName).ToList(),
                             })
                             .ToListAsync();

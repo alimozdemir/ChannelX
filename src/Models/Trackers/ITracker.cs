@@ -12,7 +12,7 @@ namespace ChannelX.Models.Trackers
         E Remove(T context);
         Task<IEnumerable<E>> All();
         Task<IEnumerable<E>> All(string key);
-
+        Task Update(E val);
         Task<E> Find(string key);
 
     }

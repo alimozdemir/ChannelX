@@ -139,6 +139,13 @@ container.scrollTop = container.scrollHeight;
         text-decoration: line-through;
     }
 
+    .tgreen{
+        color:green;
+    }
+    .tred{
+        color:red;
+    }
+
 /* todo */
 @-webkit-keyframes online-color {
     0% { color: rgb(0, 255, 64); }

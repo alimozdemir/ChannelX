@@ -91,16 +91,16 @@ namespace ChannelX.Hubs
                         await Clients.Client(Context.ConnectionId).InvokeAsync("Disconnect");
                     }
                 }
-                
+
                 // online users
                 var users = (await _tracker.All(model.ChannelId.ToString())).ToList();
-                
+
                 if (users.Any(i => i.UserId.Equals(userId)))
                 {
                     await Clients.Client(Context.ConnectionId).InvokeAsync("AlreadyConnnected");
                     return;
                 }
-                
+
                 await Groups.AddAsync(Context.ConnectionId, model.ChannelId.ToString());
 
                 var userDetail = new UserDetail(Context.ConnectionId, user.UserName, model.ChannelId.ToString(), userId,
@@ -215,20 +215,20 @@ namespace ChannelX.Hubs
                 if (channel.OwnerId != target.UserId)
                 {
                     var channelUserDb = await _db.ChannelUsers.FirstOrDefaultAsync(i => i.ChannelId == id && i.UserId.Equals(target.UserId));
-
                     channelUserDb.State = (int)UserStates.Blocked;
+                    await _db.SaveChangesAsync();
+                    var temp = target.ConnectionId;
                     target.State = channelUserDb.State;
                     target.ConnectionId = "";
 
-                    await _db.SaveChangesAsync();
+                    await UpdateState(target);
 
                     // if user is online, disconnect him/her.
-                    if (!string.IsNullOrEmpty(target.ConnectionId))
+                    if (!string.IsNullOrEmpty(temp))
                     {
-                        await Clients.Client(target.ConnectionId).InvokeAsync("Disconnect");
+                        await Clients.Client(temp).InvokeAsync("Disconnect");
                     }
 
-                    await UpdateState(target);
                 }
             }
         }
@@ -277,18 +277,30 @@ namespace ChannelX.Hubs
 
         private async Task UpdateState(UserDetail user)
         {
+            await _tracker.Update(user);
+
             await Clients.Group(user.GroupId).InvokeAsync("UpdateState", user);
         }
 
         public async Task CloseAllWindows()
         {
             var userId = Context.User.GetUserId();
-            var users = (await _tracker.All()).Where(i => i.UserId.Equals(userId) 
+            var users = (await _tracker.All()).Where(i => i.UserId.Equals(userId)
                                 && !i.ConnectionId.Equals(Context.ConnectionId)).ToList();
-            
-            foreach(var item in users) 
+
+            foreach (var item in users)
             {
                 await Clients.Client(item.ConnectionId).InvokeAsync("Disconnect");
+            }
+        }
+
+        public async Task ShowUser(UserDetail target)
+        {
+            if (!string.IsNullOrEmpty(target.ConnectionId))
+            {
+                var user = await _tracker.Find(Context.ConnectionId);
+                
+                await Clients.Client(target.ConnectionId).InvokeAsync("ShowUser", user);
             }
         }
     }

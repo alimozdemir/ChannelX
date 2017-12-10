@@ -4,9 +4,13 @@
         <div v-if="loading" class="loading">Loading&#8230;</div>
         <div class="col-md-10 main">
             <div style="margin-top:-20px">
-                <h2 class="pull-left" style="margin-top:0px">{{model.title}}</h2>
+                <div class="pull-left">
+                    <h2 style="margin-top:0px; display:inline-block;">
+                        <span v-if="offline">[Offline]</span>
+                        {{model.title}}</h2> {{model.endAt | duration}}
+                </div>
                 <div class="pull-right">
-                    <a href="javascript:;" @click="getSharableLink" class="btn btn-success"> Sharable Link  </a>
+                    <a href="javascript:;" @click="getSharableLink" class="btn btn-success"> Sharable Link </a>
                 </div>
             </div>
             <div class="chat">
@@ -14,15 +18,15 @@
 
                     <li v-for="item in chats" v-bind:class="{ 'receive' : item.User && item.User.UserId !== userId, 'send' : item.User && item.User.UserId === userId, 'notify' : !item.User }">
                         <div class="msg">
-                                <span v-if="item.User && item.User.UserId !== userId">   {{item.User.Name}} : </span> 
-                             {{item.Content}}
+                            <span v-if="item.User && item.User.UserId !== userId"> {{item.User.Name}} : </span>
+                            {{item.Content}}
                         </div>
                     </li>
                 </ul>
             </div>
 
             <div class="control">
-                <input type="text" v-model="text" placeholder="Enter text" id="text" class="form-control" @keyup.enter="send">
+                <input type="text" v-model="text" placeholder="Enter text" id="text" v-bind:disabled="offline" class="form-control" @keyup.enter="send">
             </div>
 
         </div>
@@ -32,24 +36,48 @@
                 <p>Online Users</p>
 
                 <div v-for="item in users" class="dropdown user">
-                    <span v-if="item.ConnectionId" class="green">•</span> 
+                    <span v-if="item.ConnectionId" class="green">•</span>
                     <span v-bind:class="{ 'owner': model.ownerId === item.UserId, 'blocked': isBlocked(item.State) }">{{item.Name}}</span>
-                    <template v-if="user && isAuthorize(user.State) && model.ownerId !== item.UserId && item.UserId != userId">
-                        <a  href="javascript:;" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-option-vertical"></span></a>
+                    <template v-if="user && item.UserId != userId">
+                        <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
+                            <span class="glyphicon glyphicon-option-vertical"></span>
+                        </a>
                         <ul class="dropdown-menu">
-                            <li><a href="javascript:;" @click="showUser(item.UserId)">Profile</a></li>
-                            <li class="divider"></li>
+                            <li>
+                                <a href="javascript:;">
+                                    <span v-if="item.ConnectionId" class="tgreen">Online</span>
+                                    <span v-else class="tred">Offline</span>
+                                </a>
+                            </li>
+                            <li v-if="item.ConnectionId">
+                                <a href="javascript:;" @click="share(item)">Share my information</a>
+                            </li>
+                            <template v-if="isAuthorize(user.State)">
+                                <li v-if="item.ConnectionId" class="divider"></li>
+                                <li v-if="item.ConnectionId && model.ownerId !== item.UserId">
+                                    <a href="javascript:;" @click="kick(item)">Kick</a>
+                                </li>
+                                <template v-if="model.ownerId !== item.UserId">
+                                    <li v-if="item.ConnectionId" class="divider"></li>
+                                    <li v-if="!isBlocked(item.State)">
+                                        <a href="javascript:;" @click="block(item)">Block</a>
+                                    </li>
+                                    <li v-else>
+                                        <a href="javascript:;" @click="resetUser(item)">Unblock</a>
+                                    </li>
+                                    <li v-if="!isAuthorize(item.State)">
+                                        <a href="javascript:;" @click="auth(item)">Authorize</a>
+                                    </li>
+                                    <li v-else>
+                                        <a href="javascript:;" @click="resetUser(item)">Unauthorize</a>
+                                    </li>
+                                </template>
+                            </template>
 
-                            <li v-if="item.ConnectionId"><a href="javascript:;" @click="kick(item)">Kick</a></li>
-                            <li v-if="item.ConnectionId" class="divider"></li>
-                            <li v-if="!isBlocked(item.State)"><a href="javascript:;" @click="block(item)">Block</a></li>
-                            <li v-else><a href="javascript:;" @click="resetUser(item)">Unblock</a></li>
-                            <li v-if="!isAuthorize(item.State)"><a href="javascript:;" @click="auth(item)">Authorize</a></li>
-                            <li v-else><a href="javascript:;" @click="resetUser(item)">Unauthorize</a></li>
 
                         </ul>
                     </template>
-                  </div>
+                </div>
 
             </div>
         </div>

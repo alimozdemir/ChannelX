@@ -7,8 +7,8 @@ import resultModel from '../../models/resultModel';
 import swal from 'sweetalert';
 import { UserStore, UserState } from '../../stores/userState'
 import UserComponent from "../user/user";
+import moment from 'moment';
 import './open.css';
-import { ButtonList,ButtonOptions } from 'sweetalert/typings/modules/options/buttons';
 
 interface getModel {
     id: number,
@@ -49,20 +49,28 @@ const chatAPI: string = "api/chat?token=";
         // thus, we have to call fetchData when the $route object changed
         '$route': 'fetchData',
         'chats': 'toBottom'
+    },
+    filters: {
+        duration: function (value: Date) {
+            return moment(value).fromNow();
+        }
     }
 })
 export default class ChannelOpenComponent extends Vue {
     id: number = 0;
     model: getModel = Object.assign({}, defaultGetModel);
+    user: userDetail | null = null;
+
     text: string = "";
     loading: boolean = false;
     chats: textModel[] = [];
     connection: HubConnection | null = null;
     users: userDetail[] = [];
     userId: string = "";
-    user: userDetail | null = null;
-    // signalr should have a status value for connection status.
-    disconnected: boolean = false;
+    
+    disconnected: boolean = false; // signalr should have a status value for connection status.
+    offline: boolean = false; // when the channel time is over.
+    timerId: number = -1; // setTimeout id from calculatingTime function
 
     me(users: userDetail[]) {
         let index = users.findIndex(i => i.UserId === this.userId);
@@ -71,8 +79,6 @@ export default class ChannelOpenComponent extends Vue {
             this.user = users[index];
         else
             this.user = null;
-
-        console.log(this.user, index, this.userId, users)
     }
 
     toBottom() {
@@ -170,9 +176,17 @@ export default class ChannelOpenComponent extends Vue {
             await this.connection.invoke('leave');
             this.connection.stop();
         }
+
+        if (this.timerId != -1)
+            clearTimeout(this.timerId)
     }
 
     async getLogs() {
+        if (!this.isActive()) {
+            this.offline = true;
+        }
+        else
+            this.calculationTime();
 
         if (this.userId === undefined || this.userId === "")
             this.userId = await UserStore.readUserId(this.$store);
@@ -189,10 +203,11 @@ export default class ChannelOpenComponent extends Vue {
         this.connection.on('disconnect', this.disconnect);
         this.connection.on('updateState', this.updateState);
         this.connection.on('alreadyConnnected', this.alreadyConnnected);
+        this.connection.on('showUser', this.showUser);
         this.connection.invoke('join', { channelId: this.id });
     }
     async disconnect() {
-
+        console.log("DISCONNECT!");
         if (this.connection) {
             this.disconnected = true;
 
@@ -213,16 +228,18 @@ export default class ChannelOpenComponent extends Vue {
         this.me(users);
         this.users = users;
         this.loading = false;
-
+        console.log("UserList", users);
     }
 
     userLeft(user: userDetail) {
-        console.log("userLeft", user)
+        if (this.offline)
+            return;
         let index = this.users.findIndex(i => i.UserId == user.UserId);
 
         if (index > -1) {
             let model: textModel = { Content: this.users[index].Name + ' is offline.', User: undefined, SentTime: new Date() };
             this.chats.push(model)
+            console.log("fak this şit")
             this.updateState(user);
             //this.$forceUpdate();
         }
@@ -230,6 +247,8 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     userJoined(user: userDetail) {
+        if (this.offline)
+            return;
         let index = this.users.findIndex(i => i.UserId === user.UserId);
 
         if (index == -1) {
@@ -262,11 +281,17 @@ export default class ChannelOpenComponent extends Vue {
         this.chats.push(msg);
     }
 
-    async showUser(id: string) {
-        let popup = new UserComponent(id);
+    async showUser(user: userDetail) {
+        let popup = new UserComponent(user.UserId);
         this.loading = true;
         await popup.show();
         this.loading = false;
+    }
+
+    async share(user: userDetail) {
+        if (this.connection) {
+            this.connection.invoke('showUser', user);
+        }
     }
 
     async getSharableLink() {
@@ -283,6 +308,32 @@ export default class ChannelOpenComponent extends Vue {
             });
     }
 
+    // channel is still active or not
+    isActive() {
+        let result: boolean = false;
+        
+        if (this.model.id && new Date(this.model.endAt) > new Date()) {
+            result = true;
+        }
+        return result;
+    }
+
+    calculationTime() {
+        if (this.model.id && !this.offline) {
+            // calculate the time
+            var endTime = new Date(this.model.endAt).getTime()
+                , timeNow = new Date().getTime()
+                , milliSecond = endTime - timeNow;
+            // set a timeout for channel
+            this.timerId = setTimeout(async () => {
+                this.offline = true;
+                await swal({
+                    title: "Channel is closed",
+                    text: "The channel way is shut by deaths ! (LOTR)"
+                })
+            }, milliSecond);
+        }
+    }
     async alreadyConnnected() {
 
         let result = await swal({
@@ -290,7 +341,7 @@ export default class ChannelOpenComponent extends Vue {
             icon: 'warning',
             dangerMode: true,
             buttons: {
-                cancel : {
+                cancel: {
                     text: 'Cancel',
                     value: false,
                     visible: true,
@@ -307,8 +358,8 @@ export default class ChannelOpenComponent extends Vue {
             }
         })
 
-        if (result){
-            if(this.connection){
+        if (result) {
+            if (this.connection) {
                 this.connection.invoke('closeAllWindows');
                 this.connection.invoke('join', { channelId: this.id });
             }
@@ -330,7 +381,6 @@ export default class ChannelOpenComponent extends Vue {
 
     kick(user: userDetail) {
         if (this.connection != null) {
-            console.log("Kicking the user..");
             this.connection.send("kick", user);
         }
     }
@@ -346,15 +396,21 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     updateState(user: userDetail) {
+        console.log(new Date(), "updateState", user)
+
         this.users.forEach(element => {
             if (element.UserId == user.UserId) {
                 element.State = user.State;
                 element.ConnectionId = user.ConnectionId;
             }
+            else if(this.user && element.UserId == this.user.UserId && this.user.UserId == user.UserId){
+                element.State = user.State;
+                console.log("wtf")
+            }
         });
-        if (this.user && this.user.UserId === user.UserId) {
+        /*if (this.user && this.user.UserId === user.UserId) {
             this.user.State = user.State;
-        }
+        }*/
     }
 
     isBlocked(val: UserStates) { return val === UserStates.Blocked; }
