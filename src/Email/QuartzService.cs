@@ -39,7 +39,7 @@ namespace ChannelX.Email
                         //.StartAt(DateTime.Now.AddMinutes(1))
                         // .WithCronSchedule("0 22 * * 0") // “At 22:00 on Sunday.”
                         .WithSimpleSchedule(x => x
-                            .WithIntervalInSeconds(20)
+                            .WithIntervalInSeconds(120)
                             .RepeatForever()
                         )
                         .Build();
