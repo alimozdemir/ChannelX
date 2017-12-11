@@ -88,6 +88,7 @@ export default class ChannelOpenComponent extends Vue {
 
     async fetchData() {
         console.log("fetchData");
+        this.loading = true;
         this.chats = []; // clear the log
 
         if (this.connection !== null) {
@@ -199,7 +200,7 @@ export default class ChannelOpenComponent extends Vue {
 
         let url = chatAPI + UserStore.readAuthKey(this.$store);
 
-        this.connection = new HubConnection(url, {  });
+        this.connection = new HubConnection(url, { transport:TransportType.LongPolling  });
 
         await this.connection.start();
 
