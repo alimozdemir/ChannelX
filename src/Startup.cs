@@ -91,10 +91,6 @@ namespace ChannelX
 
             services.Configure<Models.Configuration.Tokens>(tokenConfiguration);
 
-            var redisConfiguration = Configuration.GetSection("Redis");
-
-            services.Configure<Models.Configuration.Redis>(redisConfiguration);
-
             services.AddSingleton<Token.JwtSecurityHelper>();
 
             services.AddSignalR();

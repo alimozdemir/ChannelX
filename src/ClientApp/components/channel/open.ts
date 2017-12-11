@@ -87,11 +87,12 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async fetchData() {
+        console.log("fetchData");
         this.chats = []; // clear the log
 
         if (this.connection !== null) {
-            this.connection.invoke('leave');
-            this.connection.stop();
+            await this.connection.invoke('leave');
+            await this.connection.stop();
         }
 
         this.connection = null;
@@ -176,7 +177,7 @@ export default class ChannelOpenComponent extends Vue {
 
         if (this.connection !== null && !this.disconnected) {
             await this.connection.invoke('leave');
-            this.connection.stop();
+            await this.connection.stop();
         }
 
         if (this.timerId != -1)
@@ -184,20 +185,24 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async getLogs() {
+        console.log("getLogs1");
         if (!this.isActive()) {
             this.offline = true;
         }
         else
             this.calculationTime();
+        console.log("getLogs2");
+        
 
         if (this.userId === undefined || this.userId === "")
             this.userId = await UserStore.readUserId(this.$store);
 
         let url = chatAPI + UserStore.readAuthKey(this.$store);
 
-        this.connection = new HubConnection(url, { transport:TransportType.LongPolling });
+        this.connection = new HubConnection(url, {  });
 
         await this.connection.start();
+
         this.connection.on('userList', this.userList);
         this.connection.on('userLeft', this.userLeft);
         this.connection.on('userJoined', this.userJoined);
@@ -206,7 +211,7 @@ export default class ChannelOpenComponent extends Vue {
         this.connection.on('updateState', this.updateState);
         this.connection.on('alreadyConnnected', this.alreadyConnnected);
         this.connection.on('showUser', this.showUser);
-        this.connection.invoke('join', { channelId: this.id });
+        await this.connection.invoke('join', { channelId: this.id });
     }
     async disconnect() {
         console.log("DISCONNECT!");
@@ -215,7 +220,7 @@ export default class ChannelOpenComponent extends Vue {
 
             await this.connection.invoke('leave');
 
-            this.connection.stop();
+            await this.connection.stop();
 
             await swal({
                 text: "You have been disconnected from channel.",
@@ -267,13 +272,13 @@ export default class ChannelOpenComponent extends Vue {
         //this.$forceUpdate();
     }
 
-    send() {
+    async send() {
         if (this.connection !== null && this.text !== "" && this.text !== undefined) {
 
             let me = this.users.findIndex(i => i.UserId === this.userId);
 
             let model: textModel = { Content: this.text, User: this.users[me], SentTime: new Date() };
-            this.connection.invoke('send', model)
+            await this.connection.invoke('send', model)
 
             this.text = "";
         }
@@ -292,7 +297,7 @@ export default class ChannelOpenComponent extends Vue {
 
     async share(user: userDetail) {
         if (this.connection) {
-            this.connection.invoke('showUser', user);
+            await this.connection.invoke('showUser', user);
         }
     }
 
@@ -362,38 +367,38 @@ export default class ChannelOpenComponent extends Vue {
 
         if (result) {
             if (this.connection) {
-                this.connection.invoke('closeAllWindows');
-                this.connection.invoke('join', { channelId: this.id });
+                await this.connection.invoke('closeAllWindows');
+                await this.connection.invoke('join', { channelId: this.id });
             }
         }
         else {
             if (this.connection) {
-                this.connection.stop();
+                await this.connection.stop();
             }
 
             this.$router.push('/');
         }
     }
 
-    block(user: userDetail) {
+    async block(user: userDetail) {
         if (this.connection != null) {
-            this.connection.send("block", user);
+            await this.connection.send("block", user);
         }
     }
 
-    kick(user: userDetail) {
+    async kick(user: userDetail) {
         if (this.connection != null) {
-            this.connection.send("kick", user);
+            await this.connection.send("kick", user);
         }
     }
-    auth(user: userDetail) {
+    async auth(user: userDetail) {
         if (this.connection != null) {
-            this.connection.send("authorize", user);
+            await this.connection.send("authorize", user);
         }
     }
-    resetUser(user: userDetail) {
+    async resetUser(user: userDetail) {
         if (this.connection != null) {
-            this.connection.send("resetUser", user);
+            await this.connection.send("resetUser", user);
         }
     }
 
