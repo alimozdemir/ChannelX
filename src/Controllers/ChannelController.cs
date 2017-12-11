@@ -193,6 +193,7 @@ namespace ChannelX.Controllers
                         if (!string.IsNullOrEmpty(data.Password))
                         {
                             result.Prompt = true;
+                            result.Data = data.Id;
                             result.Message = "Enter Password";
                         }
                         else

@@ -119,6 +119,9 @@ export default class ChannelOpenComponent extends Vue {
         if (get.status == 200) {
             let result = get.data as resultModel;
             if (result.prompt) {
+                if(this.$route.params.hash){
+                    this.id = result.data as number
+                }
 
                 var password = await swal({
                     text: result.message,

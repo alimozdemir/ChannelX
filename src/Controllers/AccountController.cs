@@ -45,7 +45,7 @@ namespace ChannelX.Controllers
 
                 if (signResult.Succeeded)
                 {
-                    var user = await _userManager.Users.FirstOrDefaultAsync(i => i.UserName == model.UserName);
+                    var user = await _userManager.Users.FirstOrDefaultAsync(i => i.NormalizedUserName.Equals(model.UserName.ToUpper()));
 
                     var token = _jwtHelper.GetToken(user.Id);
                     var key = _jwtHelper.GetTokenValue(token);
