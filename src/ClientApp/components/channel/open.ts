@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import { Component } from 'vue-property-decorator';
 import { createDecorator } from 'vue-class-component'
-import signalR, { HubConnection } from '@aspnet/signalr-client';
+import signalR, { HubConnection, TransportType } from '@aspnet/signalr-client';
 import axios from 'axios';
 import resultModel from '../../models/resultModel';
 import swal from 'sweetalert';
@@ -87,6 +87,8 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async fetchData() {
+        this.chats = []; // clear the log
+
         if (this.connection !== null) {
             this.connection.invoke('leave');
             this.connection.stop();
@@ -193,7 +195,7 @@ export default class ChannelOpenComponent extends Vue {
 
         let url = chatAPI + UserStore.readAuthKey(this.$store);
 
-        this.connection = new HubConnection(url, {});
+        this.connection = new HubConnection(url, { transport:TransportType.LongPolling });
 
         await this.connection.start();
         this.connection.on('userList', this.userList);

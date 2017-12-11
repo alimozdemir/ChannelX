@@ -53,7 +53,6 @@ namespace ChannelX
             });
 
             var tokenConfiguration = Configuration.GetSection("Tokens");
-
             services.AddAuthentication()
                     .AddJwtBearer(options => {
                         options.TokenValidationParameters = new TokenValidationParameters
@@ -86,6 +85,10 @@ namespace ChannelX
 
             services.Configure<Models.Configuration.Tokens>(tokenConfiguration);
 
+            var redisConfiguration = Configuration.GetSection("Redis");
+
+            services.Configure<Models.Configuration.Redis>(redisConfiguration);
+            
             services.AddSingleton<Token.JwtSecurityHelper>();
 
             services.AddSignalR();
@@ -130,7 +133,7 @@ namespace ChannelX
             app.UseStaticFiles();
 
             app.UseAuthentication();
-
+            
             app.UseSignalR(routes =>
             {
                 routes.MapHub<Hubs.Chat>("api/chat");
