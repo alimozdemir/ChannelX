@@ -10,6 +10,7 @@ using ChannelX.Models.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using System.Net.Mail;
 using System.Net;
+using System.IO;
 
 namespace ChannelX.Email
 {
@@ -52,11 +53,11 @@ public class AuthMessageSender : IEmailSender
             // Construct the message body
             var finalized_message = "";
             // Add upper part of the mail
-            finalized_message+= System.IO.File.ReadAllText(_env.ContentRootPath + "\\wwwroot\\email_templates\\heml_upper.txt");
+            finalized_message+= System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "heml_upper.txt"));
             // Add message body part of the mail 
             finalized_message+= message;
             // Add lower part of the mail
-            finalized_message+= System.IO.File.ReadAllText(_env.ContentRootPath + "\\wwwroot\\email_templates\\heml_lower.txt");
+            finalized_message+= System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "heml_lower.txt"));
 
             mail.Body = finalized_message;
             mail.IsBodyHtml = true;

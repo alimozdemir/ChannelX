@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
 using System.Web;
+using System.IO;
 
 using Quartz;
 using ChannelX.Email;
@@ -33,7 +34,7 @@ public class SendBulkEmail : IJob
     readonly IRedisConnectionFactory _fact;
     readonly IHostingEnvironment _env;
 
-    public SendBulkEmail(IEmailSender emailSender, DatabaseContext db, UserTracker tracker,  IRedisConnectionFactory fact, IHostingEnvironment env)
+    public SendBulkEmail(IEmailSender emailSender, DatabaseContext db, UserTracker tracker, IRedisConnectionFactory fact, IHostingEnvironment env)
     {
         _db = db;
         _emailSender = emailSender;
@@ -41,7 +42,7 @@ public class SendBulkEmail : IJob
         _fact = fact;
         _env = env;
         _redis_db = fact.Connection();
-        
+
     }
     public async Task Execute(IJobExecutionContext context)
     {
@@ -57,23 +58,23 @@ public class SendBulkEmail : IJob
         var channel_list = _db.Channels.Include(i => i.Owner).Include(i => i.Users).ThenInclude(i => i.User).ToList();
         foreach (var channel in channel_list)
         {
-            if(channel.Id == 4)
+            if (channel.Id == 4)
                 continue;
-                
+
             // First check the channel owner
-            CheckTheUserForMessage(channel.Owner, channel.Id);
+            CheckTheUserForMessage(channel.Owner, channel.Id, channel.Title);
             // For all users in the currently fetched channel
             foreach (var user in channel.Users)
             {
-                CheckTheUserForMessage(user.User, user.ChannelId);
+                CheckTheUserForMessage(user.User, user.ChannelId, channel.Title);
             }
         }
         System.Diagnostics.Debug.WriteLine("----------------------------");
     }
 
-    public async void CheckTheUserForMessage(ApplicationUser user, int ChannelId)
+    public async void CheckTheUserForMessage(ApplicationUser user, int ChannelId, string channelName)
     {
-        if(user.UserName == "haha" || user.UserName == "haha2")
+        if (user.UserName == "haha" || user.UserName == "haha2")
             return;
 
         //Console.WriteLine(user.UserId);
@@ -81,12 +82,14 @@ public class SendBulkEmail : IJob
         var sent_email_body = "";
         var last_seen_time = DateTime.Now;
         List<TextModel> message_list = new List<TextModel>();
-        
+
         // last seen is updated ondisconnectedasync
         RedisValue test_data;
-        try{
+        try
+        {
             test_data = _redis_db.HashGet("LastSeen" + ChannelId, user.Id);
-        }catch
+        }
+        catch
         {
             return;
         }
@@ -95,16 +98,16 @@ public class SendBulkEmail : IJob
 
         // Get all the messages in that channel
         // Compare them with last seen, and append them to list
-        var messages = _redis_db.ListRange(ChannelId.ToString(),0,-1);
-        foreach(var message in messages)
+        var messages = _redis_db.ListRange(ChannelId.ToString(), 0, -1);
+        foreach (var message in messages)
         {
             TextModel text = JsonConvert.DeserializeObject<TextModel>(message);
 
             var sent_time = Convert.ToDateTime(text.SentTime);
-            if( sent_time > last_seen_time )
+            if (sent_time > last_seen_time)
             {
                 // Add message to bulk email content
-                sent_email_body+=text.Content;
+                sent_email_body += text.Content;
                 // Add message to list
                 message_list.Add(text);
                 // Increment the counter
@@ -120,7 +123,7 @@ public class SendBulkEmail : IJob
         {
             var finalized_mail_body = GetFormattedMessage(message_list, user);
             // Send the email to user
-            await _emailSender.SendEmailAsync(user.Email, "Channel Bulk Mail Feed", finalized_mail_body);
+            await _emailSender.SendEmailAsync(user.Email, "Channel Bulk Mail Feed : " + channelName, finalized_mail_body);
             // Set last seen for this person in this channel to this message
             HashEntry entry = new HashEntry(user.Id.ToString(), DateTime.Now.ToString());
             HashEntry[] arr = new HashEntry[1];
@@ -132,24 +135,24 @@ public class SendBulkEmail : IJob
     public string GetFormattedMessage(List<TextModel> message_list, ApplicationUser current_user)
     {
         var finalized_message = "";
-        finalized_message+=System.IO.File.ReadAllText(_env.ContentRootPath + "\\wwwroot\\email_templates\\bulk_templates\\latest_feed_header.txt");;
-        foreach(var mes in message_list)
+        finalized_message += System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "bulk_templates", "latest_feed_header.txt"));
+        foreach (var mes in message_list)
         {
             if (mes.User.UserId == current_user.Id)
             {
-                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\wwwroot\\email_templates\\bulk_templates\\self_msg_template\\div_row_self_upper.txt");
+                finalized_message += System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "bulk_templates", "self_msg_template", "div_row_self_upper.txt"));
                 finalized_message += mes.User.Name;
-                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\wwwroot\\email_templates\\bulk_templates\\self_msg_template\\div_row_self_middle.txt");
+                finalized_message += System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "bulk_templates", "self_msg_template", "div_row_self_middle.txt"));
                 finalized_message += mes.Content;
-                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\wwwroot\\email_templates\\bulk_templates\\self_msg_template\\div_row_self_lower.txt");
+                finalized_message += System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "bulk_templates", "self_msg_template", "div_row_self_lower.txt"));
             }
             else
             {
-                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\wwwroot\\email_templates\\bulk_templates\\other_ppl_msg_template\\div_row_other_upper.txt");
+                finalized_message += System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "bulk_templates", "other_ppl_msg_template", "div_row_other_upper.txt"));
                 finalized_message += mes.User.Name;
-                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\wwwroot\\email_templates\\bulk_templates\\other_ppl_msg_template\\div_row_other_middle.txt");
+                finalized_message += System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "bulk_templates", "other_ppl_msg_template", "div_row_other_middle.txt"));
                 finalized_message += mes.Content;
-                finalized_message += System.IO.File.ReadAllText(_env.ContentRootPath + "\\wwwroot\\email_templates\\bulk_templates\\other_ppl_msg_template\\div_row_other_lower.txt");
+                finalized_message += System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "bulk_templates", "other_ppl_msg_template", "div_row_other_lower.txt"));
             }
         }
         return finalized_message;
