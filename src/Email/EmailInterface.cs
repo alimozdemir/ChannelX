@@ -11,16 +11,24 @@ using Microsoft.AspNetCore.Hosting;
 using System.Net.Mail;
 using System.Net;
 using System.IO;
+using System.Net.Http;
 
 namespace ChannelX.Email
 {
 public class AuthMessageSender : IEmailSender
     {
         public IHostingEnvironment _env;
+        private static HttpClient client; //singleton
         public AuthMessageSender(IOptions<EmailSettings> emailSettings, IHostingEnvironment env)
         {
             _emailSettings = emailSettings.Value;
             _env = env;
+            client = new HttpClient();
+            if(emailSettings.Value.Key != null)
+            {
+                var val = Convert.ToBase64String(Encoding.ASCII.GetBytes(string.Format("{0}:{1}", "api", emailSettings.Value.Key)));
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", val);
+            }
         }
 
         public EmailSettings _emailSettings { get; }
@@ -29,27 +37,11 @@ public class AuthMessageSender : IEmailSender
         {
             return Execute (email, subject, message);
         }
-
-        public async Task Execute(string email, string subject, string message)
+        private async Task Execute(string email, string subject, string message)
         {
-            string toEmail = string.IsNullOrEmpty(email) 
-                             ? _emailSettings.ToEmail 
-                             : email;
 
-            // If emailsettings.json read failed, code should not process further
-            if (_emailSettings.UsernameEmail == null)
-            {
-                System.Diagnostics.Debug.WriteLine("emailsettings.json is not loaded!");
+            if(_emailSettings.Key == null)
                 return;
-            }
-
-            MailMessage mail = new MailMessage()
-            {
-                From = new MailAddress(_emailSettings.UsernameEmail, "ChannelX Staff")
-            };
-
-            mail.To.Add(new MailAddress(toEmail));
-            mail.Subject = "ChannelX Mail System - " + subject;
             // Construct the message body
             var finalized_message = "";
             // Add upper part of the mail
@@ -59,19 +51,26 @@ public class AuthMessageSender : IEmailSender
             // Add lower part of the mail
             finalized_message+= System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "heml_lower.txt"));
 
-            mail.Body = finalized_message;
-            mail.IsBodyHtml = true;
-            mail.Priority = MailPriority.High;
 
-            using (SmtpClient smtp = new SmtpClient(_emailSettings.SecondayDomain, _emailSettings.SecondaryPort))
-            {
-                smtp.Credentials = new NetworkCredential(_emailSettings.UsernameEmail, _emailSettings.UsernamePassword);
-                smtp.EnableSsl = true;
-                await smtp.SendMailAsync(mail);
-                System.Diagnostics.Debug.WriteLine("Sending Email.");
-            }            
-            System.Diagnostics.Debug.WriteLine("Process completed.");
-        }
+            Dictionary<string, string> values = new Dictionary<string, string>();
+
+            values.Add("from", $"ChannelX Staff <{_emailSettings.From}>");
+            values.Add("to", email);
+            values.Add("subject",  "ChannelX Mail System - " + subject);
+            values.Add("text", finalized_message);
+            values.Add("html", finalized_message);
+
+            FormUrlEncodedContent content = new FormUrlEncodedContent(values);
+
+            var response = await client.PostAsync("https://api.mailgun.net/v3/mubis.net/messages", content);
+
+            string responseString = string.Empty;
+
+            if(response.StatusCode == HttpStatusCode.OK)
+                responseString = await response.Content.ReadAsStringAsync();
+
+        }        
+
 
         Task IEmailSender.SendEmailAsync(string email, string subject, string message)
         {

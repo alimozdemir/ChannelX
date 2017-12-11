@@ -1,11 +1,11 @@
 
 using System;
 
-namespace ChannelX.Models.Configuration 
+namespace ChannelX.Models.Configuration
 {
     public class EmailSettings
     {
-        public String PrimaryDomain { get; set; }
+        /*public String PrimaryDomain { get; set; }
 
         public int PrimaryPort { get; set; }
 
@@ -21,6 +21,8 @@ namespace ChannelX.Models.Configuration
 
         public String ToEmail { get; set; }
 
-        public String CcEmail { get; set; }
+        public String CcEmail { get; set; }*/
+        public string Key { get; set; }
+        public string From { get; set; }
     }
 }
