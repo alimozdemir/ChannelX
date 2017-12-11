@@ -180,8 +180,9 @@ namespace ChannelX.Hubs
 
                 _redis_db.InsertMessage(user, message);
 
-                System.Diagnostics.Debug.WriteLine(model.Content);
+                System.Diagnostics.Debug.WriteLine(message.SentTime);
                 await Clients.Group(user.GroupId).InvokeAsync("Receive", message);
+                _redis_db.UpdateLastSeen(user);
             }
         }
         public async Task Kick(UserDetail target)

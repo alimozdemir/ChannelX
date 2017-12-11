@@ -111,6 +111,7 @@ namespace ChannelX.Redis
                 HashEntry entry = new HashEntry(user.UserId.ToString(), DateTime.Now.ToString());
                 HashEntry[] arr = new HashEntry[1];
                 arr[0] = entry;
+                System.Diagnostics.Debug.WriteLine(entry.Value);
                 db.HashSet("LastSeen" + user.GroupId.ToString(), arr);
                 return true;
             }
