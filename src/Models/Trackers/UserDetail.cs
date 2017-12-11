@@ -32,5 +32,11 @@ namespace ChannelX.Models.Trackers
 
             }
         }
+        
+        // not sure
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

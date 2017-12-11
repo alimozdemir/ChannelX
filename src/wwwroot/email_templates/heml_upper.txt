@@ -76,7 +76,7 @@
        </o:OfficeDocumentSettings>
       </xml><![endif]-->
   </head>
-  <body class="body" style="background-color: #C6FFF1; margin: 0; width: 100%;">
+  <body class="body" style="background-color: white; margin: 0; width: 100%;">
     <table class="bodyTable" role="presentation" width="100%" align="left" border="0" cellpadding="0" cellspacing="0" style="width: 100%; background-color: #C6FFF1; margin: 0;" bgcolor="#C6FFF1">
       <tr>
         <td class="body__content" align="left" width="100%" valign="top" style="color: #000000; font-family: Helvetica,Arial,sans-serif; font-size: 16px; line-height: 20px;">

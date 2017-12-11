@@ -47,7 +47,7 @@ public class SendBulkEmail : IJob
     public async Task Execute(IJobExecutionContext context)
     {
         System.Diagnostics.Debug.WriteLine("Trying to execute the job.");
-        GenerateBulkEmailAsync();
+        await GenerateBulkEmailAsync();
     }
 
     public async Task GenerateBulkEmailAsync()
@@ -62,17 +62,17 @@ public class SendBulkEmail : IJob
                 continue;
 
             // First check the channel owner
-            CheckTheUserForMessage(channel.Owner, channel.Id, channel.Title);
+            await CheckTheUserForMessage(channel.Owner, channel.Id, channel.Title);
             // For all users in the currently fetched channel
             foreach (var user in channel.Users)
             {
-                CheckTheUserForMessage(user.User, user.ChannelId, channel.Title);
+                await CheckTheUserForMessage(user.User, user.ChannelId, channel.Title);
             }
         }
         System.Diagnostics.Debug.WriteLine("----------------------------");
     }
 
-    public async void CheckTheUserForMessage(ApplicationUser user, int ChannelId, string channelName)
+    public async Task CheckTheUserForMessage(ApplicationUser user, int ChannelId, string channelName)
     {
         if (user.UserName == "haha" || user.UserName == "haha2")
             return;
@@ -102,7 +102,6 @@ public class SendBulkEmail : IJob
         foreach (var message in messages)
         {
             TextModel text = JsonConvert.DeserializeObject<TextModel>(message);
-
             var sent_time = Convert.ToDateTime(text.SentTime);
             if (sent_time > last_seen_time)
             {
@@ -121,7 +120,7 @@ public class SendBulkEmail : IJob
         }
         else
         {
-            var finalized_mail_body = GetFormattedMessage(message_list, user);
+            var finalized_mail_body = GetFormattedMessage(message_list, user, channelName);
             // Send the email to user
             await _emailSender.SendEmailAsync(user.Email, "Channel Bulk Mail Feed : " + channelName, finalized_mail_body);
             // Set last seen for this person in this channel to this message
@@ -132,10 +131,10 @@ public class SendBulkEmail : IJob
         }
     }
 
-    public string GetFormattedMessage(List<TextModel> message_list, ApplicationUser current_user)
+    public string GetFormattedMessage(List<TextModel> message_list, ApplicationUser current_user, string channelName)
     {
         var finalized_message = "";
-        finalized_message += System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "bulk_templates", "latest_feed_header.txt"));
+        finalized_message += System.IO.File.ReadAllText(Path.Combine(_env.ContentRootPath, "wwwroot", "email_templates", "bulk_templates", "latest_feed_header.txt")).Replace("{{title}}", channelName);
         foreach (var mes in message_list)
         {
             if (mes.User.UserId == current_user.Id)

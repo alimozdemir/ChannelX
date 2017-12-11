@@ -43,9 +43,15 @@ namespace ChannelX
             });
              	
             services.AddSingleton<IRedisConnectionFactory, RedisConnectionFactory>();
-            services.AddIdentity<Data.ApplicationUser, IdentityRole>()
-                    .AddEntityFrameworkStores<Data.DatabaseContext>()
-                    .AddDefaultTokenProviders();
+            services.AddIdentity<Data.ApplicationUser, IdentityRole>(o => {
+                o.Password.RequireDigit = false;
+                o.Password.RequiredLength = 6;
+                o.Password.RequireLowercase = false;
+                o.Password.RequireUppercase = false;
+                o.Password.RequireNonAlphanumeric = false;
+
+            }).AddEntityFrameworkStores<Data.DatabaseContext>()
+                .AddDefaultTokenProviders();
             
             services.ConfigureApplicationCookie(i => {
                 i.LoginPath = "/login";
@@ -88,7 +94,7 @@ namespace ChannelX
             var redisConfiguration = Configuration.GetSection("Redis");
 
             services.Configure<Models.Configuration.Redis>(redisConfiguration);
-            
+
             services.AddSingleton<Token.JwtSecurityHelper>();
 
             services.AddSignalR();

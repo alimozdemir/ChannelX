@@ -6,6 +6,7 @@ namespace ChannelX.Models.Account
     {
       
         [Required]
+        [MinLength(6)]
         public string Password { get; set; }
         
         [Required]
