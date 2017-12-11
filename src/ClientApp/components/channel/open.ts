@@ -200,7 +200,7 @@ export default class ChannelOpenComponent extends Vue {
 
         let url = chatAPI + UserStore.readAuthKey(this.$store);
 
-        this.connection = new HubConnection(url, { transport:TransportType.WebSockets  });
+        this.connection = new HubConnection(url, { transport:TransportType.LongPolling  });
 
         await this.connection.start();
 
