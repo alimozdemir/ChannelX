@@ -87,7 +87,7 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async fetchData() {
-        console.log("fetchData");
+
         this.loading = true;
         this.chats = []; // clear the log
 
@@ -189,13 +189,11 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     async getLogs() {
-        console.log("getLogs1");
         if (!this.isActive()) {
             this.offline = true;
         }
         else
             this.calculationTime();
-        console.log("getLogs2");
         
 
         if (this.userId === undefined || this.userId === "")
@@ -203,7 +201,7 @@ export default class ChannelOpenComponent extends Vue {
 
         let url = chatAPI + UserStore.readAuthKey(this.$store);
 
-        this.connection = new HubConnection(url, { transport:TransportType.LongPolling  });
+        this.connection = new HubConnection(url, { });
 
         await this.connection.start();
 
@@ -218,7 +216,6 @@ export default class ChannelOpenComponent extends Vue {
         await this.connection.invoke('join', { channelId: this.id });
     }
     async disconnect() {
-        console.log("DISCONNECT!");
         if (this.connection) {
             this.disconnected = true;
 
@@ -239,7 +236,6 @@ export default class ChannelOpenComponent extends Vue {
         this.me(users);
         this.users = users;
         this.loading = false;
-        console.log("UserList", users);
     }
 
     userLeft(user: userDetail) {
@@ -250,7 +246,6 @@ export default class ChannelOpenComponent extends Vue {
         if (index > -1) {
             let model: textModel = { Content: this.users[index].Name + ' is offline.', User: undefined, SentTime: new Date() };
             this.chats.push(model)
-            console.log("fak this şit")
             this.updateState(user);
             //this.$forceUpdate();
         }
@@ -410,7 +405,7 @@ export default class ChannelOpenComponent extends Vue {
     }
 
     updateState(user: userDetail) {
-        console.log(new Date(), "updateState", user)
+        
 
         this.users.forEach(element => {
             if (element.UserId == user.UserId) {
@@ -419,7 +414,7 @@ export default class ChannelOpenComponent extends Vue {
             }
             else if(this.user && element.UserId == this.user.UserId && this.user.UserId == user.UserId){
                 element.State = user.State;
-                console.log("wtf")
+                
             }
         });
         /*if (this.user && this.user.UserId === user.UserId) {
