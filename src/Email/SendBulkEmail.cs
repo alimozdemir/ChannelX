@@ -94,8 +94,10 @@ public class SendBulkEmail : IJob
             return;
         }
         // Console.WriteLine("Plz: " + test_data);
+        System.Diagnostics.Debug.WriteLine(test_data);
+        
         last_seen_time = Convert.ToDateTime(test_data);
-
+        System.Diagnostics.Debug.WriteLine(last_seen_time);
         // Get all the messages in that channel
         // Compare them with last seen, and append them to list
         var messages = _redis_db.ListRange(ChannelId.ToString(), 0, -1);

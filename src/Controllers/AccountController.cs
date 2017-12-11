@@ -110,6 +110,7 @@ namespace ChannelX.Controllers
                 if (user != null)
                 {
                     result.Succeeded = true;
+                    result.Message = "User is found.";
                     var data = new GetUser(user.Id, user.UserName, user.FirstAndLastName, user.Email);
                     result.Data = data;
                 }

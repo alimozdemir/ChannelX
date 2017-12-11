@@ -3,6 +3,7 @@ using System.Collections;
 using System.Threading.Tasks;
 using ChannelX.Data;
 using ChannelX.Email;
+using ChannelX.Models;
 using ChannelX.Redis;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -141,6 +142,7 @@ namespace ChannelX.Tests
                 EndAt = DateTime.Now.AddHours(5),
                 Title = "FirstOne"
             });
+            
         }
 
         public void SetApplicationUsers(IApplicationBuilder app) 
@@ -149,8 +151,11 @@ namespace ChannelX.Tests
             {
                 Console.WriteLine(_userManager == null ? "is null" : "not null");
                 var user = new ApplicationUser { UserName = "deneme",FirstAndLastName="alim",Email = "ozdemirali@itu.edu.tr" };
-                _userManager.CreateAsync(user, "Deneme123!");
-
+                var id_result = _userManager.CreateAsync(user, "Deneme123!");
+                UserForgotPasswordKey = Helper.ShortIdentifier(); 
+                UserId = user.Id;
+                user.ForgotPasswordKey = UserForgotPasswordKey;
+                
                 var _jwtHelper = app.ApplicationServices.GetService<Token.JwtSecurityHelper>();
                 var token = _jwtHelper.GetToken(user.Id);
                 var key = _jwtHelper.GetTokenValue(token);
@@ -160,6 +165,8 @@ namespace ChannelX.Tests
 
         // General purpose auth key for 'deneme' user
         public static string AuthKey {get; set;}
+        public static string UserId{get; set;}
 
+        public static string UserForgotPasswordKey {get;set;}
     }
 }
