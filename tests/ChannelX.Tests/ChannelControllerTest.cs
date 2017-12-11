@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using ChannelX.Models;
 using ChannelX.Models.Account;
@@ -23,6 +24,9 @@ namespace ChannelX.Tests
         [Fact]
         public async Task Create()
         {
+            var key = Startup.AuthKey;
+            var user_id = Startup.UserId;
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", key);
             CreateModel model = new CreateModel();
             model.Password = "";
             model.EndAtHours = 2;
@@ -35,6 +39,7 @@ namespace ChannelX.Tests
             var content = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<ResultModel>(content);
             Assert.True(result.Succeeded);
+            _client.DefaultRequestHeaders.Clear();
         }
 
         [Fact]

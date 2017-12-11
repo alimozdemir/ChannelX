@@ -304,5 +304,10 @@ namespace ChannelX.Hubs
                 await Clients.Client(target.ConnectionId).InvokeAsync("ShowUser", user);
             }
         }
+
+        public void UpdateLastSeen(UserDetail target)
+        {
+            _redis_db.UpdateLastSeen(target);
+        }
     }
 }

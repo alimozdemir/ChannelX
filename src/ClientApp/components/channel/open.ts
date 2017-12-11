@@ -287,6 +287,9 @@ export default class ChannelOpenComponent extends Vue {
 
     receive(msg: textModel) {
         this.chats.push(msg);
+        if(this.connection != null){
+            this.connection.invoke("updateLastSeen",this.user);
+        }
     }
 
     async showUser(user: userDetail) {
