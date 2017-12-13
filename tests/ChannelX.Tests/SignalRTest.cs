@@ -17,12 +17,10 @@ namespace ChannelX.Tests
 {
     public class HubConnectionTest : IClassFixture<TestFixture<Startup>>
     {
-        SocketConnectionFixture _connection;
         TestFixture<Startup> _fixture;
 
         public HubConnectionTest(TestFixture<Startup> fixture)
         {
-            _connection = new SocketConnectionFixture();
             _fixture = fixture;
             
         }
@@ -42,19 +40,21 @@ namespace ChannelX.Tests
         [Fact]
         public async Task ConnectionTest1()
         {
-            // NOT WORKING
-            Console.WriteLine("CONNECTION TEST {0}", _fixture.Client.BaseAddress);
-            Console.WriteLine(Startup.AuthKey);
-            var response = await _fixture.Client.GetAsync("http://localhost:5000/api/chat");
+            var response = await _fixture.Client.GetAsync("http://localhost:5000/api/chat?token="+Startup.AuthKey);
             Console.WriteLine(response);
 
-            /*var connection = new HubConnectionBuilder()
+            
+            
+            
+            
+            
+            Console.WriteLine("SignalR HubConnectionBuilder");
+            var connection = new HubConnectionBuilder()
                 .WithUrl("http://localhost:5000/api/chat?token="+Startup.AuthKey)
                 .WithConsoleLogger()
                 .Build();
                 
-            await connection.StartAsync();*/
-            //await _connection.Connection.StartAsync();
+            await connection.StartAsync();
         }
 
 
