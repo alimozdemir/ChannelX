@@ -262,7 +262,10 @@ namespace ChannelX.Controllers
             if (model.Count > 0 && model.CurrentPage >= 0 && model.Total > 0)
             {
                 var userId = User.GetUserId();
-
+                foreach(var chuser in _db.Channels.Include(i =>i.Users))
+                {
+                    System.Diagnostics.Debug.WriteLine(chuser);
+                }
                 var list = await _db.Channels
                             .Include(i => i.Users)
                             .Where(i => i.Owner.Equals(userId) || i.Users.Any(u => u.UserId.Equals(userId)))

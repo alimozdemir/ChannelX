@@ -37,7 +37,6 @@ namespace ChannelX.Tests
         {
             services.AddDbContext<DatabaseContext>(o => o.UseInMemoryDatabase("InMemoryDb"));
 
-
             services.AddSingleton<IRedisConnectionFactory, RedisConnectionFactory>();
             services.AddIdentity<Data.ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<Data.DatabaseContext>()
@@ -99,10 +98,9 @@ namespace ChannelX.Tests
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
-            /*using(var context = app.ApplicationServices.GetService<DatabaseContext>())
-            {
-                InitializeDatabase(context);
-            }*/
+            
+            
+            AppServices =  app.ApplicationServices;
             loggerFactory.AddDebug();
             loggerFactory.AddConsole();
             
@@ -133,14 +131,19 @@ namespace ChannelX.Tests
             });
 
             SetApplicationUsers(app);
+            
+            var context = app.ApplicationServices.GetService<DatabaseContext>();
+            InitializeDatabase(context);
         }
 
         public void InitializeDatabase(DatabaseContext context)
         {
+            
             context.Channels.Add(new Channel() {
                 CreatedAt = DateTime.Now,
                 EndAt = DateTime.Now.AddHours(5),
-                Title = "FirstOne"
+                Title = "FirstOne",
+                OwnerId = UserId
             });
             
         }
@@ -168,5 +171,6 @@ namespace ChannelX.Tests
         public static string UserId{get; set;}
 
         public static string UserForgotPasswordKey {get;set;}
+        public static IServiceProvider AppServices {get; set;}
     }
 }
