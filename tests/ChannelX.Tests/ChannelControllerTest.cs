@@ -159,26 +159,14 @@ namespace ChannelX.Tests
             Assert.False(result.Succeeded);
             _client.DefaultRequestHeaders.Clear();
         }
-        /*
+        
         [Fact]
         public async Task GetWithPassword()
         {
-            var key = MockData.AuthKey;
-            var user_id = MockData.FirstUserId;
-            var app_services = Startup.AppServices;
-            var service = (DatabaseContext)app_services.GetService(typeof(DatabaseContext));
-            var data = service.Channels;
-            int id = 0;
-            string pw = String.Empty;
-            foreach (var channel in data)
-            {
-                id = channel.Id;
-                pw = channel.Password;
-            }
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", key);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", MockData.AuthKey);
             PasswordFormModel model = new PasswordFormModel();
-            model.Id = id;
-            model.Password = pw;
+            model.Id = MockData.CPublicSecondUserWithPasswordTwo;
+            model.Password = "1";
 
             var response = await _client.PostAsync("/api/Channel/GetWithPassword",
                 new StringContent(JsonConvert.SerializeObject(model), System.Text.Encoding.UTF8, "application/json"));
@@ -187,34 +175,54 @@ namespace ChannelX.Tests
             var result = JsonConvert.DeserializeObject<TResultModel<ListModel>>(content);
             Assert.True(result.Succeeded);
             _client.DefaultRequestHeaders.Clear();
-        } */
+        } 
 
-/*
         [Fact]
-        public async Task HistoryPage()
+        public async Task HistoryPageWithValidData()
         {
-            var key = MockData.AuthKey;
-            var user_id = MockData.FirstUserId;
-            var app_services = Startup.AppServices;
-            var service = (DatabaseContext)app_services.GetService(typeof(DatabaseContext));
-            var data = service.Channels;
-            foreach (var channel in data)
-            {
-                System.Diagnostics.Debug.Write(channel.Id);
-            }
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", key);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", MockData.AuthKey);
             HistoryPaginationModel model = new HistoryPaginationModel();
-            model.Count = 1;
+            model.Count = 10;
             model.CurrentPage = 1;
-            model.Total = 1;
+            model.Total = 2;
             var response = await _client.GetAsync($"/api/Channel/HistoryPage/?Count={model.Count}&CurrentPage={model.CurrentPage}&Total={model.Total}");
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
             //var result = JsonConvert.DeserializeObject<HistoryModel>(content);
-            Assert.Equal(content, "[]");
+            Assert.NotEqual("[]", content);
             _client.DefaultRequestHeaders.Clear();
         }
 
- */
+        [Fact]
+        public async Task HistoryPageWithInvalidData()
+        {
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", MockData.AuthKey);
+            HistoryPaginationModel model = new HistoryPaginationModel();
+            model.Count = -1;
+            model.CurrentPage = -1;
+            model.Total = 10;
+            var response = await _client.GetAsync($"/api/Channel/HistoryPage/?Count={model.Count}&CurrentPage={model.CurrentPage}&Total={model.Total}");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            //var result = JsonConvert.DeserializeObject<HistoryModel>(content);
+            Assert.Equal(content, "null");
+            _client.DefaultRequestHeaders.Clear();
+        }
+        
+        [Fact]
+        public async Task HistoryPageTotalCount()
+        {
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", MockData.AuthKey);
+            HistoryPaginationModel model = new HistoryPaginationModel();
+            model.Count = 1;
+            model.CurrentPage = 1;
+            model.Total = 1;
+            var response = await _client.GetAsync($"/api/Channel/HistoryPageTotal");
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<int>(content);
+            Assert.True(result > 0);
+            _client.DefaultRequestHeaders.Clear();
+        }
     }
 }

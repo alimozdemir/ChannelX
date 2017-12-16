@@ -183,6 +183,14 @@ namespace ChannelX.Tests
             };
 
 
+            var ch6 = new Channel()
+            {
+                CreatedAt = DateTime.Now,
+                EndAt = DateTime.Now.AddHours(5),
+                Title = "ChannelWithPassword",
+                OwnerId = MockData.SecondUserId,
+                Password = "1"
+            };
             // Public First User
             context.Channels.Add(ch1);
             // Public Second User
@@ -196,6 +204,7 @@ namespace ChannelX.Tests
 
             // Public Second User With Hash Value
             context.Channels.Add(ch5);
+            context.Channels.Add(ch6);
 
             context.SaveChanges();
 
@@ -204,6 +213,7 @@ namespace ChannelX.Tests
             MockData.CPublicFirstUserWithPassword = ch3.Id;
             MockData.CPublicSecondUserWithPassword = ch4.Id;
             MockData.CPublicSecondUserHash = ch5.Hash;
+            MockData.CPublicSecondUserWithPasswordTwo = ch6.Id;
 
         }
 
@@ -244,6 +254,7 @@ namespace ChannelX.Tests
         public static int CPublicSecondUser { get; set; }
         public static int CPublicFirstUserWithPassword { get; set; }
         public static int CPublicSecondUserWithPassword { get; set; }
+        public static int CPublicSecondUserWithPasswordTwo { get; set; }
         public static string CPublicSecondUserHash { get; set; }
     }
 }
