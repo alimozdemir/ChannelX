@@ -37,7 +37,7 @@ namespace ChannelX.Tests
             mockObject.Verify(c => c.StartAsync(), Times.Once());
         }*/
 
-        [Fact]
+        /*[Fact]
         public async Task ConnectionTest1()
         {
             var response = await _fixture.Client.GetAsync("http://localhost:5000/api/chat?token="+Startup.AuthKey);
@@ -55,7 +55,7 @@ namespace ChannelX.Tests
                 .Build();
                 
             await connection.StartAsync();
-        }
+        }*/
 
 
     }

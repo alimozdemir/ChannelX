@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Linq;
 using System.Threading.Tasks;
 using ChannelX.Data;
 using ChannelX.Email;
@@ -28,7 +29,7 @@ namespace ChannelX.Tests
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                 .AddJsonFile("emailsettings.json", optional: true)
                 .AddEnvironmentVariables();
-                
+
             Configuration = builder.Build();
         }
 
@@ -41,16 +42,18 @@ namespace ChannelX.Tests
             services.AddIdentity<Data.ApplicationUser, IdentityRole>()
                     .AddEntityFrameworkStores<Data.DatabaseContext>()
                     .AddDefaultTokenProviders();
-            
-            services.ConfigureApplicationCookie(i => {
+
+            services.ConfigureApplicationCookie(i =>
+            {
                 i.LoginPath = "/login";
-                 
+
             });
 
             var tokenConfiguration = Configuration.GetSection("Tokens");
-            
+
             services.AddAuthentication()
-                    .AddJwtBearer(options => {
+                    .AddJwtBearer(options =>
+                    {
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
                             ValidateIssuer = true,
@@ -62,7 +65,7 @@ namespace ChannelX.Tests
                             ValidAudience = "ChannelX",
                             IssuerSigningKey = Token.JwtSecurityHelper.Key("5fdc4141-0815-4fa9-8c69-f25200e1831a")
                         };
-                        
+
                         options.SaveToken = true;
                         options.Events = new JwtBearerEvents();
                         options.Events.OnMessageReceived = context =>
@@ -98,17 +101,17 @@ namespace ChannelX.Tests
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
-            
-            
-            AppServices =  app.ApplicationServices;
+
+
+            AppServices = app.ApplicationServices;
             loggerFactory.AddDebug();
             loggerFactory.AddConsole();
-            
+
             app.UseDeveloperExceptionPage();
             app.UseWebpackDevMiddleware(new Microsoft.AspNetCore.SpaServices.Webpack.WebpackDevMiddlewareOptions
-                {
-                    HotModuleReplacement = true
-                });
+            {
+                HotModuleReplacement = true
+            });
 
             app.UseStaticFiles();
 
@@ -131,46 +134,116 @@ namespace ChannelX.Tests
             });
 
             SetApplicationUsers(app);
-            
+
             var context = app.ApplicationServices.GetService<DatabaseContext>();
             InitializeDatabase(context);
         }
 
         public void InitializeDatabase(DatabaseContext context)
         {
-            
-            context.Channels.Add(new Channel() {
+            var ch1 = new Channel()
+            {
                 CreatedAt = DateTime.Now,
                 EndAt = DateTime.Now.AddHours(5),
                 Title = "FirstOne",
-                OwnerId = UserId
-            });
-            
+                OwnerId = MockData.FirstUserId
+            };
+            var ch2 = new Channel()
+            {
+                CreatedAt = DateTime.Now,
+                EndAt = DateTime.Now.AddHours(5),
+                Title = "SecondOne",
+                OwnerId = MockData.SecondUserId
+            };
+            var ch3 = new Channel()
+            {
+                CreatedAt = DateTime.Now,
+                EndAt = DateTime.Now.AddHours(5),
+                Title = "ChannelWithPassword",
+                OwnerId = MockData.FirstUserId,
+                Password = "1"
+            };
+
+            var ch4 = new Channel()
+            {
+                CreatedAt = DateTime.Now,
+                EndAt = DateTime.Now.AddHours(5),
+                Title = "ChannelWithPassword",
+                OwnerId = MockData.SecondUserId,
+                Password = "1"
+            };
+
+            var ch5 = new Channel()
+            {
+                CreatedAt = DateTime.Now,
+                EndAt = DateTime.Now.AddHours(5),
+                Title = "ChannelHash",
+                OwnerId = MockData.SecondUserId,
+                Hash = Helper.ShortIdentifier()
+            };
+
+
+            // Public First User
+            context.Channels.Add(ch1);
+            // Public Second User
+            context.Channels.Add(ch2);
+
+            // Public First User With Password
+            context.Channels.Add(ch3);
+
+            // Public Second User With Password
+            context.Channels.Add(ch4);
+
+            // Public Second User With Hash Value
+            context.Channels.Add(ch5);
+
+            context.SaveChanges();
+
+            MockData.CPublicFirstUser = ch1.Id;
+            MockData.CPublicSecondUser = ch2.Id;
+            MockData.CPublicFirstUserWithPassword = ch3.Id;
+            MockData.CPublicSecondUserWithPassword = ch4.Id;
+            MockData.CPublicSecondUserHash = ch5.Hash;
+
         }
 
-        public void SetApplicationUsers(IApplicationBuilder app) 
+        public void SetApplicationUsers(IApplicationBuilder app)
         {
             var _userManager = app.ApplicationServices.GetService<UserManager<ApplicationUser>>();
             {
-                Console.WriteLine(_userManager == null ? "is null" : "not null");
-                var user = new ApplicationUser { UserName = "deneme",FirstAndLastName="alim",Email = "ozdemirali@itu.edu.tr" };
+                var user = new ApplicationUser { UserName = "deneme", FirstAndLastName = "alim", Email = "ozdemirali@itu.edu.tr" };
                 var id_result = _userManager.CreateAsync(user, "Deneme123!");
-                UserForgotPasswordKey = Helper.ShortIdentifier(); 
-                UserId = user.Id;
+                UserForgotPasswordKey = Helper.ShortIdentifier();
+                MockData.FirstUserId = user.Id;
                 user.ForgotPasswordKey = UserForgotPasswordKey;
-                
+
                 var _jwtHelper = app.ApplicationServices.GetService<Token.JwtSecurityHelper>();
                 var token = _jwtHelper.GetToken(user.Id);
                 var key = _jwtHelper.GetTokenValue(token);
-                AuthKey = key;
+                MockData.AuthKey = key;
+
+                var secondUser = new ApplicationUser { UserName = "Deneme1", FirstAndLastName = "alim2", Email = "alm.ozdmr@live.com" };
+                _userManager.CreateAsync(secondUser, "Deneme123!");
+                MockData.SecondUserId = secondUser.Id;
             }
         }
 
         // General purpose auth key for 'deneme' user
-        public static string AuthKey {get; set;}
-        public static string UserId{get; set;}
 
-        public static string UserForgotPasswordKey {get;set;}
-        public static IServiceProvider AppServices {get; set;}
+        public static string UserForgotPasswordKey { get; set; }
+        public static IServiceProvider AppServices { get; set; }
+    }
+
+    public class MockData
+    {
+        public static string AuthKey { get; set; }
+        public static string FirstUserId { get; set; }
+        public static string SecondUserId { get; set; }
+
+        public static int CPublicFirstUser { get; set; }
+        public static int CPublicSecondUser { get; set; }
+        public static int CPublicFirstUserWithPassword { get; set; }
+        public static int CPublicSecondUserWithPassword { get; set; }
+        public static string CPublicSecondUserHash { get; set; }
     }
 }
