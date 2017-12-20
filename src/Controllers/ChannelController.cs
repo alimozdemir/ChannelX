@@ -268,7 +268,7 @@ namespace ChannelX.Controllers
                 }
                 var list = await _db.Channels
                             .Include(i => i.Users)
-                            .Where(i => i.Owner.Equals(userId) || i.Users.Any(u => u.UserId.Equals(userId)))
+                            .Where(i => i.OwnerId.Equals(userId) || i.Users.Any(u => u.UserId.Equals(userId)))
                             .Skip((model.CurrentPage - 1) * model.Count)
                             .Take(model.Count)
                             .Select(i => new HistoryModel()
