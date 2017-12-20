@@ -14,10 +14,10 @@ ChannelX: Transient Shared Communication Channels project aims to provide a secu
 ![Screens 2](https://github.com/lyzerk/ChannelX/raw/master/docs/chat_low.gif "Screens 2")
 
 ## Requirements
-⋅⋅* dotnet core (https://www.microsoft.com/net/download/core)
-⋅⋅* node & npm (https://nodejs.org/en/)
-⋅⋅* [OPTIONAL] redis (https://redis.io)
-⋅⋅* [OPTIONAL] email settings (we used mailgun api)
+* dotnet core (https://www.microsoft.com/net/download/core)
+* node & npm (https://nodejs.org/en/)
+* [OPTIONAL] redis (https://redis.io)
+* [OPTIONAL] email settings (we used mailgun api)
 
 ## Installation
 
